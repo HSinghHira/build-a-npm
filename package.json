@@ -1,0 +1,30 @@
+{
+  "name": "@hsinghhira/build-a-npm",
+  "version": "0.1.0",
+  "description": "A tool to create and publish Node packages with automatic version bumping",
+  "keywords": [
+    "none"
+  ],
+  "homepage": "https://github.com/HSinghHira/build-a-npm#readme",
+  "bugs": {
+    "url": "https://github.com/HSinghHira/build-a-npm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HSinghHira/build-a-npm.git"
+  },
+  "license": "MIT",
+  "author": "Harman Singh Hira",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "node publish.js"
+  },
+  "dependencies": {
+    "inquirer": "^9.2.12"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "access": "public"
+  }
+}
