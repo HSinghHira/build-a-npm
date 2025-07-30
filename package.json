@@ -18,7 +18,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "node publish.js"
+    "publish": "node publish.js && git add -A && git commit -m 'Update' && git push"
   },
   "dependencies": {
     "inquirer": "^9.2.12"
