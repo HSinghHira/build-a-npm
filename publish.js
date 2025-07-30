@@ -28,7 +28,7 @@ function publishVariant(name, registry) {
 }
 
 // Step 1: Publish unscoped to npmjs
-publishVariant("hexo-adv-img-optimizer", "https://registry.npmjs.org/");
+publishVariant("build-a-npm", "https://registry.npmjs.org/");
 
 // Step 2: Publish scoped to GitHub Packages
 publishVariant("@hsinghhira/build-a-npm", "https://npm.pkg.github.com/");
