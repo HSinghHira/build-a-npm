@@ -1,5 +1,5 @@
 {
-  "name": "build-a-npm",
+  "name": "@hsinghhira/build-a-npm",
   "version": "0.1.0",
   "description": "A tool to create and publish Node packages with automatic version bumping",
   "keywords": [
@@ -24,7 +24,7 @@
     "inquirer": "^9.2.12"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
+    "registry": "https://npm.pkg.github.com/",
     "access": "public"
   }
 }
