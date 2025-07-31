@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 
-const inquirer = require("inquirer");
 const fs = require("fs");
 const { execSync } = require("child_process");
 
+// Dynamic import for inquirer (ES module)
+async function getInquirer() {
+  const inquirer = await import("inquirer");
+  return inquirer.default;
+}
+
 async function promptPackageDetails() {
+  const inquirer = await getInquirer();
+
   const questions = [
     {
       type: "input",
@@ -66,7 +73,7 @@ async function promptPackageDetails() {
     },
   ];
 
-  return inquirer.prompt(questions);
+  return await inquirer.prompt(questions);
 }
 
 function generatePackageJson(answers) {
@@ -126,6 +133,12 @@ function generatePublishScript(packageName, repositoryUrl) {
   return `const fs = require('fs');
 const { execSync } = require('child_process');
 
+// Dynamic import for inquirer
+async function getInquirer() {
+  const inquirer = await import('inquirer');
+  return inquirer.default;
+}
+
 function bumpVersion(version) {
   const parts = version.split('.').map(Number);
   parts[2] += 1; // Increment patch version
@@ -164,7 +177,8 @@ function publishVariant(name, registry) {
 }
 
 async function confirmPublish() {
-  const { confirm } = await require('inquirer').prompt([
+  const inquirer = await getInquirer();
+  const { confirm } = await inquirer.prompt([
     {
       type: 'confirm',
       name: 'confirm',
@@ -226,12 +240,11 @@ module.exports = {
 
 async function main() {
   try {
-    console.log(
-      "🚀 Welcome to build-a-npm! Let's create your Node package.\\n"
-    );
+    console.log("🚀 Welcome to build-a-npm! Let's create your Node package.\n");
 
     // Check if package.json already exists
     if (fs.existsSync("package.json")) {
+      const inquirer = await getInquirer();
       const { overwrite } = await inquirer.prompt([
         {
           type: "confirm",
@@ -305,15 +318,15 @@ yarn-error.log*
       console.log("✅ Generated .gitignore");
     }
 
-    console.log("\\n🎉 Package setup complete!");
-    console.log("\\n📋 Next steps:");
+    console.log("\n🎉 Package setup complete!");
+    console.log("\n📋 Next steps:");
     console.log(
       "1. Set your GITHUB_TOKEN environment variable for GitHub Packages"
     );
     console.log('2. Run "npm install" to install dependencies');
     console.log("3. Add your package code to index.js");
     console.log('4. Run "npm run publish" to publish your package');
-    console.log("\\n💡 The publish script will:");
+    console.log("\n💡 The publish script will:");
     console.log("   - Automatically bump the patch version");
     console.log("   - Publish to both npmjs.org and GitHub Packages");
     console.log("   - Commit and push changes to your repository");
