@@ -1,14 +1,33 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.1.15",
-  "description": "A tool to create and publish Node packages with automatic version bumping",
-  "license": "MIT",
-  "author": "Harman Singh Hira",
-  "type": "commonjs",
-  "main": "index.js",
-  "bin": {
-    "build-a-npm": "./index.js"
+  "version": "0.2.2",
+  "author": {
+    "name": "Harman Singh Hira",
+    "url": "https://me.hsinghhira.me"
   },
+  "description": "A tool to create and publish Node packages with automatic version bumping",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "github": "git add -A && git commit -m \"Building\" && git push",
+    "publish": "npm run publish:patch && npm run github",
+    "publish:patch": "node publish.js --github --npmjs",
+    "publish:minor": "node publish.js --github --npmjs --minor",
+    "publish:major": "node publish.js --github --npmjs --major"
+  },
+  "dependencies": {
+    "build-a-npm": "0.2.1",
+    "inquirer": "^12.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsinghhira/build-a-npm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hsinghhira/build-a-npm/issues"
+  },
+  "homepage": "https://github.com/HSinghHira/build-a-npm",
   "keywords": [
     "npm",
     "package",
@@ -19,31 +38,8 @@
     "github-packages",
     "npmjs"
   ],
-  "homepage": "https://github.com/HSinghHira/build-a-npm#readme",
-  "bugs": {
-    "url": "https://github.com/HSinghHira/build-a-npm/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/HSinghHira/build-a-npm.git"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "node publish.js && git add -A && git commit -m 'Update' && git push"
-  },
-  "devDependencies": {},
-  "dependencies": {
-    "inquirer": "^12.9.0"
-  },
-  "engines": {
-    "node": ">=12.0.0"
-  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
     "access": "public"
-  },
-  "files": [
-    "index.js",
-    "publish.js"
-  ]
+  }
 }

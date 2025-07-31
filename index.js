@@ -29,13 +29,6 @@ function colorize(text, code) {
 async function promptPackageDetails() {
   const inquirer = await getInquirer();
 
-  // Detect package manager from npm_config_user_agent
-  let detectedPackageManager = "npm";
-  const userAgent = process.env.npm_config_user_agent || "";
-  if (userAgent.includes("yarn")) detectedPackageManager = "Yarn";
-  else if (userAgent.includes("pnpm")) detectedPackageManager = "pnpm";
-  else if (userAgent.includes("bun")) detectedPackageManager = "Bun";
-
   const questions = [
     {
       type: "list",
@@ -61,21 +54,6 @@ async function promptPackageDetails() {
       message: "Where do you want to publish your package?",
       choices: ["npmjs", "GitHub Packages", "Both"],
       default: "Both",
-    },
-    {
-      type: "list",
-      name: "packageManager",
-      message: "Which package manager do you want to use?",
-      choices: ["npm", "Yarn", "pnpm", "Bun", "Other"],
-      default: detectedPackageManager,
-    },
-    {
-      type: "input",
-      name: "customPackageManager",
-      message: "Enter the name of your custom package manager:",
-      when: (answers) => answers.packageManager === "Other",
-      validate: (input) =>
-        input.trim() !== "" ? true : "Package manager name is required",
     },
     {
       type: "input",
@@ -152,6 +130,13 @@ async function promptPackageDetails() {
       type: "input",
       name: "authorEmail",
       message: "Enter author email:",
+      validate: (input) => {
+        if (!input) return true; // Email is optional
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(input)
+          ? true
+          : "Please enter a valid email address";
+      },
     },
     {
       type: "input",
@@ -219,12 +204,6 @@ function generatePackageJson(answers) {
     isGitHub && !answers.name.startsWith("@")
       ? `@${answers.githubUsername}/${answers.name}`
       : answers.name;
-  const packageManager =
-    answers.packageManager === "Other"
-      ? answers.customPackageManager
-      : answers.packageManager.toLowerCase();
-  const isBun = packageManager === "bun";
-  const runCommand = isBun ? packageManager : `${packageManager} run`;
 
   const packageJson = {
     name: packageName,
@@ -238,23 +217,33 @@ function generatePackageJson(answers) {
     main: "index.js",
     license: answers.license,
     scripts: {
-      publish: `${runCommand} publish:patch`,
-      "publish:patch": `${packageManager} node_modules/build-a-npm/publish.js --${
-        isGitHub ? "github --npmjs" : "npmjs"
+      test: "jest",
+      publish: isGitHub
+        ? "npm run publish:patch && npm run github"
+        : "npm run publish:patch",
+      "publish:patch": `node node_modules/build-a-npm/publish.js ${
+        isGitHub ? "--github --npmjs" : "--npmjs"
       }`,
-      "publish:minor": `${packageManager} node_modules/build-a-npm/publish.js --${
-        isGitHub ? "github --npmjs" : "npmjs"
+      "publish:minor": `node node_modules/build-a-npm/publish.js ${
+        isGitHub ? "--github --npmjs" : "--npmjs"
       } --minor`,
-      "publish:major": `${packageManager} node_modules/build-a-npm/publish.js --${
-        isGitHub ? "github --npmjs" : "npmjs"
+      "publish:major": `node node_modules/build-a-npm/publish.js ${
+        isGitHub ? "--github --npmjs" : "--npmjs"
       } --major`,
     },
     dependencies: {
       inquirer: "^12.9.0",
       "build-a-npm": "^0.1.8",
     },
-    devDependencies: {},
+    devDependencies: {
+      jest: "^29.7.0",
+    },
   };
+
+  if (isGitHub) {
+    packageJson.scripts.github =
+      'git add -A && git commit -m "Building" && git push';
+  }
 
   if (repositoryUrl) {
     packageJson.repository = {
@@ -330,12 +319,23 @@ function checkNpmLogin() {
     execSync('npm whoami', { stdio: 'pipe' });
     return true;
   } catch (err) {
+    console.error('❌ Not logged into npm. Please run \`npm login\` to authenticate.');
     return false;
   }
 }
 
 function checkGitHubToken() {
-  return !!process.env.GITHUB_TOKEN || fs.existsSync('.npmrc');
+  if (fs.existsSync('.npmrc')) {
+    const npmrcContent = fs.readFileSync('.npmrc', 'utf-8');
+    if (npmrcContent.includes('npm.pkg.github.com') && npmrcContent.includes('_authToken')) {
+      return true;
+    }
+  }
+  if (process.env.GITHUB_TOKEN) {
+    return true;
+  }
+  console.error('❌ GITHUB_TOKEN not set or .npmrc missing. Please set GITHUB_TOKEN environment variable or configure .npmrc with a valid GitHub token.');
+  return false;
 }
 
 const originalPackageJson = fs.readFileSync('package.json', 'utf-8');
@@ -367,8 +367,9 @@ function publishVariant(name, registry) {
     execSync(\`npm publish --registry=\${registry}\`, { stdio: 'inherit' });
     console.log(\`✅ Published \${name}@\${newVersion} to \${registry}\`);
   } catch (err) {
-    console.error(\`❌ Failed to publish \${name}:\`, err.message);
-    console.error(\`💡 Run \`npm login\` for npmjs or set GITHUB_TOKEN for GitHub Packages\`);
+    console.error(\`❌ Failed to publish \${name} to \${registry}: \${err.message}\`);
+    console.error(\`💡 Ensure you have the correct permissions and are authenticated. Run \`npm login\` for npmjs or verify your GITHUB_TOKEN for GitHub Packages.\`);
+    throw err;
   }
 }
 
@@ -399,34 +400,42 @@ async function main() {
     return;
   }
 
-  if (publishNpmjs) {
-    if (!checkNpmLogin()) {
-      console.error('❌ Not logged into npm. Run \`npm login\` and try again.');
-      process.exit(1);
+  try {
+    if (publishNpmjs) {
+      if (!checkNpmLogin()) {
+        console.error('❌ Please authenticate with npm before publishing.');
+        process.exit(1);
+      }
+      if (await confirmPublish('npmjs.com')) {
+        publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
+      }
     }
-    if (await confirmPublish('npmjs.com')) {
-      publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
-    }
-  }
 
-  if (publishGithub) {
-    if (!checkGitHubToken()) {
-      console.error('❌ GITHUB_TOKEN not set or .npmrc missing. Set GITHUB_TOKEN environment variable or configure .npmrc.');
-      process.exit(1);
+    if (publishGithub) {
+      if (!checkGitHubToken()) {
+        console.error('❌ Please set a valid GITHUB_TOKEN or configure .npmrc correctly.');
+        process.exit(1);
+      }
+      if (await confirmPublish('GitHub Packages')) {
+        const scopedName = '${githubPackageName}';
+        publishVariant(scopedName, 'https://npm.pkg.github.com/');
+      }
     }
-    if (await confirmPublish('GitHub Packages')) {
-      const scopedName = '${githubPackageName}';
-      publishVariant(scopedName, 'https://npm.pkg.github.com/');
-    }
-  }
 
-  // Restore original package.json
-  fs.writeFileSync('package.json', originalPackageJson);
-  console.log('\\n🔄 package.json restored to original state.');
+    // Restore original package.json
+    fs.writeFileSync('package.json', originalPackageJson);
+    console.log('\\n🔄 package.json restored to original state.');
+  } catch (err) {
+    console.error('❌ Publishing failed:', err.message);
+    fs.writeFileSync('package.json', originalPackageJson);
+    console.log('\\n🔄 package.json restored to original state.');
+    process.exit(1);
+  }
 }
 
 main().catch(err => {
   console.error('❌ Error:', err.message);
+  console.error('💡 Check your network connection, authentication credentials, or file permissions.');
   process.exit(1);
 });
 `;
@@ -453,12 +462,6 @@ module.exports = {
 function generateReadme(answers) {
   const packageName = answers.name;
   const publishTo = answers.publishTo;
-  const packageManager =
-    answers.packageManager === "Other"
-      ? answers.customPackageManager
-      : answers.packageManager.toLowerCase();
-  const installCommand =
-    packageManager === "bun" ? packageManager : `${packageManager} install`;
 
   return `# ${packageName}
 
@@ -467,7 +470,7 @@ ${answers.description || "A new Node.js package"}
 ## Installation
 
 \`\`\`bash
-${installCommand} ${packageName}
+npm install ${packageName}
 \`\`\`
 
 ## Usage
@@ -476,18 +479,18 @@ Add your usage instructions here.
 
 ## Publishing
 
-Run \`${
-    packageManager === "bun" ? "bun" : `${packageManager} run`
-  } publish\` to publish to ${
+Run \`npm run publish\` to publish to ${
     publishTo === "Both"
       ? "npmjs.org and GitHub Packages"
       : publishTo === "npmjs"
       ? "npmjs.org"
       : "GitHub Packages"
   }.
-Use \`${
-    packageManager === "bun" ? "bun" : `${packageManager} run`
-  } publish:minor\` or \`:major\` for minor or major version bumps.
+Use \`npm run publish:minor\` or \`:major\` for minor or major version bumps.
+
+## Testing
+
+Run \`npm test\` to execute the test suite using Jest.
 
 ## License
 
@@ -617,6 +620,68 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .npmrc
+coverage/
+`;
+}
+
+function generateTestFile() {
+  return `const { hello } = require('../index');
+
+describe('Package Functionality', () => {
+  test('hello function logs Hello World', () => {
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    hello();
+    expect(consoleLogSpy).toHaveBeenCalledWith('Hello World!');
+    consoleLogSpy.mockRestore();
+  });
+});
+`;
+}
+
+function generateGitHubWorkflow(answers) {
+  const isGitHub = ["GitHub Packages", "Both"].includes(answers.publishTo);
+  const npmjsPublish =
+    answers.publishTo === "npmjs" || answers.publishTo === "Both";
+  const githubPublish = isGitHub;
+
+  return `name: Publish Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        registry-url: ${
+          isGitHub
+            ? "'https://npm.pkg.github.com/'"
+            : "'https://registry.npmjs.org/'"
+        }
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Publish to npmjs
+      if: ${npmjsPublish}
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
+
+    - name: Publish to GitHub Packages
+      if: ${githubPublish}
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
 `;
 }
 
@@ -702,6 +767,22 @@ async function init(noGit) {
       console.log(colorize("✅ Generated index.js", "32"));
     }
 
+    // Generate test file
+    const testDir = path.join("test");
+    fs.mkdirSync(testDir, { recursive: true });
+    const testContent = generateTestFile();
+    fs.writeFileSync(path.join(testDir, "index.test.js"), testContent);
+    console.log(colorize("✅ Generated test/index.test.js", "32"));
+
+    // Generate GitHub Actions workflow if GitHub or Both selected
+    if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
+      const workflowDir = path.join(".github", "workflows");
+      fs.mkdirSync(workflowDir, { recursive: true });
+      const workflowContent = generateGitHubWorkflow(answers);
+      fs.writeFileSync(path.join(workflowDir, "publish.yml"), workflowContent);
+      console.log(colorize("✅ Generated .github/workflows/publish.yml", "32"));
+    }
+
     // Initialize git repository if not exists and --no-git flag is not set
     if (
       !noGit &&
@@ -714,7 +795,13 @@ async function init(noGit) {
       } catch (err) {
         console.log(
           colorize(
-            "⚠️  Could not initialize git repository. You may need to do this manually.",
+            "⚠️  Could not initialize git repository: " + err.message,
+            "33"
+          )
+        );
+        console.log(
+          colorize(
+            "💡 Run `git init` manually to initialize the repository.",
             "33"
           )
         );
@@ -728,13 +815,6 @@ async function init(noGit) {
       console.log(colorize("✅ Generated .gitignore", "32"));
     }
 
-    const packageManager =
-      answers.packageManager === "Other"
-        ? answers.customPackageManager
-        : answers.packageManager.toLowerCase();
-    const installCommand =
-      packageManager === "bun" ? packageManager : `${packageManager} install`;
-
     console.log("\n" + colorize("🎉 Package setup complete!", "1;36"));
     console.log("\n" + colorize("📋 Next steps:", "1;36"));
     if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
@@ -745,6 +825,12 @@ async function init(noGit) {
             "36"
           )
         );
+        console.log(
+          colorize(
+            "   - Create a token at https://github.com/settings/tokens with 'write:packages' scope",
+            "33"
+          )
+        );
       } else {
         console.log(
           colorize(
@@ -753,10 +839,18 @@ async function init(noGit) {
           )
         );
       }
+      console.log(
+        colorize(
+          "2. Configure GitHub Actions secrets (NPM_TOKEN and/or GITHUB_TOKEN) at https://github.com/" +
+            answers.githubUsername +
+            "/" +
+            answers.githubRepoName +
+            "/settings/secrets/actions",
+          "36"
+        )
+      );
     }
-    console.log(
-      colorize(`2. Run \`${installCommand}\` to install dependencies`, "36")
-    );
+    console.log(colorize("3. Run `npm install` to install dependencies", "36"));
     if (isWindows) {
       console.log(
         colorize(
@@ -772,14 +866,10 @@ async function init(noGit) {
         )
       );
     }
-    console.log(colorize("3. Add your package code to index.js", "36"));
+    console.log(colorize("4. Add your package code to index.js", "36"));
+    console.log(colorize("5. Run `npm test` to run tests", "36"));
     console.log(
-      colorize(
-        `4. Run \`${
-          packageManager === "bun" ? "bun" : `${packageManager} run`
-        } publish\` to publish your package`,
-        "36"
-      )
+      colorize(`6. Run \`npm run publish\` to publish your package`, "36")
     );
     console.log("\n" + colorize("💡 The publish script will:", "1;36"));
     console.log(
@@ -803,6 +893,12 @@ async function init(noGit) {
     );
   } catch (err) {
     console.error(colorize("❌ Error:", "31"), err.message);
+    console.error(
+      colorize(
+        "💡 Check your file permissions, network connection, or try running the command again.",
+        "33"
+      )
+    );
     process.exit(1);
   }
 }
@@ -827,6 +923,12 @@ async function main() {
 // Run the main function
 main().catch((err) => {
   console.error(colorize("❌ Error:", "31"), err.message);
+  console.error(
+    colorize(
+      "💡 Check your file permissions, network connection, or try running the command again.",
+      "33"
+    )
+  );
   process.exit(1);
 });
 
@@ -839,4 +941,6 @@ module.exports = {
   generateReadme,
   generateLicense,
   generateGitignore,
+  generateTestFile,
+  generateGitHubWorkflow,
 };
