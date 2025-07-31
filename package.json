@@ -1,6 +1,6 @@
 {
-  "name": "@hsinghhira/build-a-npm",
-  "version": "0.1.13",
+  "name": "build-a-npm",
+  "version": "0.1.14",
   "description": "A tool to create and publish Node packages with automatic version bumping",
   "license": "MIT",
   "author": "Harman Singh Hira",
@@ -39,7 +39,7 @@
     "node": ">=12.0.0"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/",
+    "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "files": [

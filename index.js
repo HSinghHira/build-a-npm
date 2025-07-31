@@ -3,7 +3,6 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
-const packageVersion = require("../package.json").version;
 
 // Dynamic import for inquirer (ES module)
 async function getInquirer() {
@@ -13,13 +12,6 @@ async function getInquirer() {
 
 async function promptPackageDetails() {
   const inquirer = await getInquirer();
-
-  // Detect package manager from npm_config_user_agent
-  let detectedPackageManager = "npm";
-  const userAgent = process.env.npm_config_user_agent || "";
-  if (userAgent.includes("yarn")) detectedPackageManager = "Yarn";
-  else if (userAgent.includes("pnpm")) detectedPackageManager = "pnpm";
-  else if (userAgent.includes("bun")) detectedPackageManager = "Bun";
 
   const questions = [
     {
@@ -34,7 +26,7 @@ async function promptPackageDetails() {
       name: "packageManager",
       message: "Which package manager do you want to use?",
       choices: ["npm", "Yarn", "pnpm", "Bun", "Other"],
-      default: detectedPackageManager,
+      default: "npm",
     },
     {
       type: "input",
@@ -80,17 +72,13 @@ async function promptPackageDetails() {
     {
       type: "input",
       name: "githubToken",
-      message:
-        "Enter your GitHub Personal Access Token (GITHUB_TOKEN) or 'NA' to skip:",
+      message: "Enter your GitHub Personal Access Token (GITHUB_TOKEN):",
       when: (answers) =>
         ["GitHub Packages", "Both"].includes(answers.publishTo),
       validate: (input) => {
-        input = input.trim();
-        if (input.toLowerCase() === "na") return true;
-        if (input === "")
-          return "GitHub token is required (or enter 'NA' to skip)";
+        if (input.trim() === "") return "GitHub token is required";
         if (!/^(ghp_|ghf_)?[A-Za-z0-9_]{36,}$/.test(input))
-          return "Invalid GitHub token format. Ensure it's a valid Personal Access Token or enter 'NA' to skip.";
+          return "Invalid GitHub token format. Ensure it's a valid Personal Access Token.";
         return true;
       },
     },
@@ -113,20 +101,12 @@ async function promptPackageDetails() {
       type: "input",
       name: "authorUrl",
       message: "Enter author URL:",
-      filter: (input) => {
-        if (!input) return input;
-        return input.match(/^https?:\/\//) ? input : `https://${input}`;
-      },
     },
     {
       type: "input",
       name: "homepage",
       message: "Enter homepage URL:",
       when: (answers) => answers.publishTo !== "GitHub Packages",
-      filter: (input) => {
-        if (!input) return input;
-        return input.match(/^https?:\/\//) ? input : `https://${input}`;
-      },
     },
     {
       type: "input",
@@ -355,8 +335,7 @@ main().catch(err => {
 }
 
 function generateNpmrc(githubUsername, githubToken) {
-  if (!githubUsername || !githubToken || githubToken.toLowerCase() === "na")
-    return "";
+  if (!githubUsername || !githubToken) return "";
   return `//npm.pkg.github.com/:_authToken=${githubToken}
 @${githubUsername}:registry=https://npm.pkg.github.com/`;
 }
@@ -482,9 +461,7 @@ yarn-error.log*
 async function init(noGit) {
   try {
     const isWindows = process.platform === "win32";
-    console.log(
-      `\x1b[36m🚀 Welcome to build-a-npm v${packageVersion}! Let's create your Node package.\x1b[0m\n`
-    );
+    console.log("🚀 Welcome to build-a-npm! Let's create your Node package.\n");
 
     // Check if package.json already exists
     if (fs.existsSync("package.json")) {
@@ -524,11 +501,8 @@ async function init(noGit) {
     fs.writeFileSync(path.join(publishDir, "publish.js"), publishScriptContent);
     console.log("✅ Generated publish.js in node_modules/build-a-npm");
 
-    // Generate .npmrc if GitHub or Both selected and token not skipped
-    if (
-      ["GitHub Packages", "Both"].includes(answers.publishTo) &&
-      answers.githubToken.toLowerCase() !== "na"
-    ) {
+    // Generate .npmrc if GitHub or Both selected
+    if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
       const npmrcContent = generateNpmrc(
         answers.githubUsername,
         answers.githubToken
@@ -586,22 +560,14 @@ async function init(noGit) {
     const installCommand =
       packageManager === "bun" ? packageManager : `${packageManager} install`;
 
-    console.log("\n\x1b[1;36m🎉 Package setup complete!\x1b[0m");
-    console.log("\n\x1b[1;36m📋 Next steps:\x1b[0m");
+    console.log("\n🎉 Package setup complete!");
+    console.log("\n📋 Next steps:");
     if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
-      if (answers.githubToken.toLowerCase() === "na") {
-        console.log(
-          "1. Set your GITHUB_TOKEN environment variable for GitHub Packages"
-        );
-      } else {
-        console.log(
-          "1. Verify your GITHUB_TOKEN in .npmrc has the 'write:packages' scope"
-        );
-      }
+      console.log(
+        "1. Verify your GITHUB_TOKEN in .npmrc has the 'write:packages' scope"
+      );
     }
-    console.log(
-      `2. Run \`\x1b[36m${installCommand}\x1b[0m\` to install dependencies`
-    );
+    console.log(`2. Run \`${installCommand}\` to install dependencies`);
     if (isWindows) {
       console.log(
         "   - On Windows, run commands in an Administrator Command Prompt to avoid permissions errors"
@@ -613,11 +579,11 @@ async function init(noGit) {
     }
     console.log("3. Add your package code to index.js");
     console.log(
-      `4. Run \`\x1b[36m${
+      `4. Run \`${
         packageManager === "bun" ? "bun" : `${packageManager} run`
-      } publish\x1b[0m\` to publish your package`
+      } publish\` to publish your package`
     );
-    console.log("\n\x1b[1;36m💡 The publish script will:\x1b[0m");
+    console.log("\n💡 The publish script will:");
     console.log(
       "   - Automatically bump the patch version (use :minor or :major for other bumps)"
     );
@@ -630,7 +596,7 @@ async function init(noGit) {
     );
     console.log("   - Commit and push changes to your repository");
   } catch (err) {
-    console.error("\x1b[31m❌ Error:\x1b[0m", err.message);
+    console.error("❌ Error:", err.message);
     process.exit(1);
   }
 }
@@ -650,7 +616,7 @@ async function main() {
 
 // Run the main function
 main().catch((err) => {
-  console.error("\x1b[31m❌ Error:\x1b[0m", err.message);
+  console.error("❌ Error:", err.message);
   process.exit(1);
 });
 
