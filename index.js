@@ -126,12 +126,14 @@ function generatePackageJson(answers) {
 }
 
 function generatePublishScript(packageName, repositoryUrl) {
+  // Extract owner from repository URL for GitHub packages
   const repoMatch = repositoryUrl.match(/github\.com[/:]([\w-]+)\/([\w-]+)/);
   const owner = repoMatch ? repoMatch[1] : "owner";
 
   return `const fs = require('fs');
 const { execSync } = require('child_process');
 
+// Dynamic import for inquirer
 async function getInquirer() {
   const inquirer = await import('inquirer');
   return inquirer.default;
@@ -147,6 +149,7 @@ const originalPackageJson = fs.readFileSync('package.json', 'utf-8');
 const originalPkg = JSON.parse(originalPackageJson);
 const newVersion = bumpVersion(originalPkg.version);
 
+// Update package.json with new version
 const updatedPkg = { ...originalPkg, version: newVersion };
 fs.writeFileSync('package.json', JSON.stringify(updatedPkg, null, 2));
 console.log(\`\\n🚀 Bumped version from \${originalPkg.version} to \${newVersion}\`);
@@ -189,17 +192,21 @@ async function confirmPublish() {
 async function main() {
   if (!(await confirmPublish())) {
     console.log('🚫 Publishing cancelled.');
+    // Restore original package.json
     fs.writeFileSync('package.json', originalPackageJson);
     return;
   }
 
+  // Publish unscoped to npmjs
   publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
 
+  // Publish scoped to GitHub Packages
   const scopedName = originalPkg.name.startsWith('@') 
     ? originalPkg.name 
     : \`@${owner}/\${originalPkg.name}\`;
   publishVariant(scopedName, 'https://npm.pkg.github.com/');
 
+  // Restore original package.json
   fs.writeFileSync('package.json', originalPackageJson);
   console.log('\\n🔄 package.json restored to original state.');
 }
@@ -212,6 +219,7 @@ main().catch(err => {
 }
 
 function generateNpmrc(repositoryUrl) {
+  // Extract owner from repository URL for GitHub packages
   const repoMatch = repositoryUrl.match(/github\.com[/:]([\w-]+)\/([\w-]+)/);
   const owner = repoMatch ? repoMatch[1] : "owner";
 
@@ -224,6 +232,7 @@ function generateIndexFile() {
 console.log('Hello from your new npm package!');
 
 module.exports = {
+  // Add your package exports here
   hello: () => console.log('Hello World!')
 };
 `;
@@ -233,6 +242,7 @@ async function init() {
   try {
     console.log("🚀 Welcome to build-a-npm! Let's create your Node package.\n");
 
+    // Check if package.json already exists
     if (fs.existsSync("package.json")) {
       const inquirer = await getInquirer();
       const { overwrite } = await inquirer.prompt([
@@ -250,25 +260,35 @@ async function init() {
       }
     }
 
+    // Prompt for package details
     const answers = await promptPackageDetails();
 
-    fs.writeFileSync("package.json", generatePackageJson(answers));
+    // Generate package.json
+    const packageJsonContent = generatePackageJson(answers);
+    fs.writeFileSync("package.json", packageJsonContent);
     console.log("✅ Generated package.json");
 
-    fs.writeFileSync(
-      "publish.js",
-      generatePublishScript(answers.name, answers.repositoryUrl)
+    // Generate publish.js
+    const publishScriptContent = generatePublishScript(
+      answers.name,
+      answers.repositoryUrl
     );
+    fs.writeFileSync("publish.js", publishScriptContent);
     console.log("✅ Generated publish.js");
 
-    fs.writeFileSync(".npmrc", generateNpmrc(answers.repositoryUrl));
+    // Generate .npmrc
+    const npmrcContent = generateNpmrc(answers.repositoryUrl);
+    fs.writeFileSync(".npmrc", npmrcContent);
     console.log("✅ Generated .npmrc");
 
+    // Generate main index.js file if it doesn't exist
     if (!fs.existsSync("index.js")) {
-      fs.writeFileSync("index.js", generateIndexFile());
+      const indexContent = generateIndexFile();
+      fs.writeFileSync("index.js", indexContent);
       console.log("✅ Generated index.js");
     }
 
+    // Initialize git repository if not exists
     if (!fs.existsSync(".git")) {
       try {
         execSync("git init", { stdio: "inherit" });
@@ -280,6 +300,7 @@ async function init() {
       }
     }
 
+    // Create .gitignore if it doesn't exist
     if (!fs.existsSync(".gitignore")) {
       const gitignoreContent = `node_modules/
 npm-debug.log*
@@ -322,11 +343,20 @@ async function main() {
   } else {
     console.log("Usage: npx build-a-npm init");
     console.log('Run "build-a-npm init" to create a new Node package.');
-    process.exit(0);
+    process.exit(1);
   }
 }
 
+// Run the main function
 main().catch((err) => {
   console.error("❌ Error:", err.message);
   process.exit(1);
 });
+
+module.exports = {
+  init,
+  promptPackageDetails,
+  generatePackageJson,
+  generatePublishScript,
+  generateNpmrc,
+};
