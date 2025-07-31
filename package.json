@@ -1,9 +1,13 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
+  },
+  "type": "commonjs",
+  "bin": {
+    "build-a-npm": "./index.js"
   },
   "description": "A tool to create and publish Node packages with automatic version bumping",
   "main": "index.js",
@@ -38,8 +42,15 @@
     "github-packages",
     "npmjs"
   ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
     "access": "public"
-  }
+  },
+  "files": [
+    "index.js",
+    "publish.js"
+  ]
 }
