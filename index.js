@@ -1,99 +1,128 @@
-const inquirer = require('inquirer');
-const fs = require('fs');
-const { execSync } = require('child_process');
+#!/usr/bin/env node
+
+const inquirer = require("inquirer");
+const fs = require("fs");
+const { execSync } = require("child_process");
 
 async function promptPackageDetails() {
   const questions = [
     {
-      type: 'input',
-      name: 'name',
-      message: 'Enter package name (e.g., my-package or @scope/my-package):',
-      validate: input => input.trim() !== '' ? true : 'Package name is required'
+      type: "input",
+      name: "name",
+      message: "Enter package name (e.g., my-package or @scope/my-package):",
+      validate: (input) =>
+        input.trim() !== "" ? true : "Package name is required",
     },
     {
-      type: 'input',
-      name: 'description',
-      message: 'Enter package description:'
+      type: "input",
+      name: "description",
+      message: "Enter package description:",
     },
     {
-      type: 'input',
-      name: 'authorName',
-      message: 'Enter author name:'
+      type: "input",
+      name: "authorName",
+      message: "Enter author name:",
     },
     {
-      type: 'input',
-      name: 'authorEmail',
-      message: 'Enter author email:'
+      type: "input",
+      name: "authorEmail",
+      message: "Enter author email:",
     },
     {
-      type: 'input',
-      name: 'authorUrl',
-      message: 'Enter author URL:'
+      type: "input",
+      name: "authorUrl",
+      message: "Enter author URL:",
     },
     {
-      type: 'input',
-      name: 'repositoryUrl',
-      message: 'Enter repository URL (e.g., https://github.com/user/repo.git):'
+      type: "input",
+      name: "repositoryUrl",
+      message: "Enter repository URL (e.g., https://github.com/user/repo.git):",
+      validate: (input) => {
+        if (!input.trim()) return "Repository URL is required";
+        return true;
+      },
     },
     {
-      type: 'input',
-      name: 'homepage',
-      message: 'Enter homepage URL:'
+      type: "input",
+      name: "homepage",
+      message: "Enter homepage URL:",
     },
     {
-      type: 'input',
-      name: 'keywords',
-      message: 'Enter keywords (comma-separated):',
-      filter: input => input.split(',').map(k => k.trim()).filter(k => k)
+      type: "input",
+      name: "keywords",
+      message: "Enter keywords (comma-separated):",
+      filter: (input) =>
+        input
+          .split(",")
+          .map((k) => k.trim())
+          .filter((k) => k),
     },
     {
-      type: 'list',
-      name: 'license',
-      message: 'Choose a license:',
-      choices: ['MIT', 'ISC', 'Apache-2.0', 'GPL-3.0', 'Unlicense'],
-      default: 'MIT'
-    }
+      type: "list",
+      name: "license",
+      message: "Choose a license:",
+      choices: ["MIT", "ISC", "Apache-2.0", "GPL-3.0", "Unlicense"],
+      default: "MIT",
+    },
   ];
 
   return inquirer.prompt(questions);
 }
 
 function generatePackageJson(answers) {
+  const repositoryUrl = answers.repositoryUrl.endsWith(".git")
+    ? answers.repositoryUrl
+    : answers.repositoryUrl + ".git";
+
+  const bugsUrl = repositoryUrl.replace(".git", "") + "/issues";
+
   const packageJson = {
     name: answers.name,
-    version: '0.0.1',
+    version: "0.0.1",
     author: {
       name: answers.authorName,
       email: answers.authorEmail,
-      url: answers.authorUrl
+      url: answers.authorUrl,
     },
     description: answers.description,
-    main: 'index.js',
+    main: "index.js",
     license: answers.license,
     repository: {
-      type: 'git',
-      url: `git+${answers.repositoryUrl}`
+      type: "git",
+      url: `git+${repositoryUrl}`,
     },
     bugs: {
-      url: `${answers.repositoryUrl.replace('.git', '')}/issues`
+      url: bugsUrl,
     },
     homepage: answers.homepage,
     keywords: answers.keywords,
     scripts: {
-      publish: "node publish.js && git add -A && git commit -m 'Update' && git push"
+      publish:
+        "node publish.js && git add -A && git commit -m 'Update' && git push",
     },
     dependencies: {},
     devDependencies: {},
     publishConfig: {
       registry: "https://npm.pkg.github.com/",
-      access: "public"
-    }
+      access: "public",
+    },
   };
+
+  // Remove empty fields to keep package.json clean
+  if (!packageJson.author.email) delete packageJson.author.email;
+  if (!packageJson.author.url) delete packageJson.author.url;
+  if (!packageJson.description) delete packageJson.description;
+  if (!packageJson.homepage) delete packageJson.homepage;
+  if (!packageJson.keywords.length) delete packageJson.keywords;
 
   return JSON.stringify(packageJson, null, 2);
 }
 
-function generatePublishScript() {
+function generatePublishScript(packageName, repositoryUrl) {
+  // Extract owner from repository URL for GitHub packages
+  const repoMatch = repositoryUrl.match(/github\.com[/:]([\w-]+)\/([\w-]+)/);
+  const owner = repoMatch ? repoMatch[1] : "owner";
+
   return `const fs = require('fs');
 const { execSync } = require('child_process');
 
@@ -110,7 +139,7 @@ const newVersion = bumpVersion(originalPkg.version);
 // Update package.json with new version
 const updatedPkg = { ...originalPkg, version: newVersion };
 fs.writeFileSync('package.json', JSON.stringify(updatedPkg, null, 2));
-console.log(\`\n🚀 Bumped version from \${originalPkg.version} to \${newVersion}\`);
+console.log(\`\\n🚀 Bumped version from \${originalPkg.version} to \${newVersion}\`);
 
 function publishVariant(name, registry) {
   const pkg = {
@@ -124,7 +153,7 @@ function publishVariant(name, registry) {
   };
 
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-  console.log(\`\n📦 Publishing \${name}@\${newVersion} to \${registry}\`);
+  console.log(\`\\n📦 Publishing \${name}@\${newVersion} to \${registry}\`);
 
   try {
     execSync(\`npm publish --registry=\${registry}\`, { stdio: 'inherit' });
@@ -160,12 +189,12 @@ async function main() {
   // Publish scoped to GitHub Packages
   const scopedName = originalPkg.name.startsWith('@') 
     ? originalPkg.name 
-    : \`@owner/\${originalPkg.name}\`;
+    : \`@${owner}/\${originalPkg.name}\`;
   publishVariant(scopedName, 'https://npm.pkg.github.com/');
 
   // Restore original package.json
   fs.writeFileSync('package.json', originalPackageJson);
-  console.log('\n🔄 package.json restored to original state.');
+  console.log('\\n🔄 package.json restored to original state.');
 }
 
 main().catch(err => {
@@ -175,54 +204,131 @@ main().catch(err => {
 `;
 }
 
-function generateNpmrc() {
+function generateNpmrc(repositoryUrl) {
+  // Extract owner from repository URL for GitHub packages
+  const repoMatch = repositoryUrl.match(/github\.com[/:]([\w-]+)\/([\w-]+)/);
+  const owner = repoMatch ? repoMatch[1] : "owner";
+
   return `//npm.pkg.github.com/:_authToken=\${GITHUB_TOKEN}
-@owner:registry=https://npm.pkg.github.com/`;
+@${owner}:registry=https://npm.pkg.github.com/`;
+}
+
+function generateIndexFile() {
+  return `// Your package main file
+console.log('Hello from your new npm package!');
+
+module.exports = {
+  // Add your package exports here
+  hello: () => console.log('Hello World!')
+};
+`;
 }
 
 async function main() {
   try {
-    console.log('Welcome to build-a-npm! Let’s create your Node package.\n');
+    console.log(
+      "🚀 Welcome to build-a-npm! Let's create your Node package.\\n"
+    );
+
+    // Check if package.json already exists
+    if (fs.existsSync("package.json")) {
+      const { overwrite } = await inquirer.prompt([
+        {
+          type: "confirm",
+          name: "overwrite",
+          message: "package.json already exists. Do you want to overwrite it?",
+          default: false,
+        },
+      ]);
+
+      if (!overwrite) {
+        console.log("⏹️  Cancelled. No files were modified.");
+        return;
+      }
+    }
 
     // Prompt for package details
     const answers = await promptPackageDetails();
 
     // Generate package.json
     const packageJsonContent = generatePackageJson(answers);
-    fs.writeFileSync('package.json', packageJsonContent);
-    console.log('✅ Generated package.json');
+    fs.writeFileSync("package.json", packageJsonContent);
+    console.log("✅ Generated package.json");
 
     // Generate publish.js
-    const publishScriptContent = generatePublishScript();
-    fs.writeFileSync('publish.js', publishScriptContent);
-    console.log('✅ Generated publish.js');
+    const publishScriptContent = generatePublishScript(
+      answers.name,
+      answers.repositoryUrl
+    );
+    fs.writeFileSync("publish.js", publishScriptContent);
+    console.log("✅ Generated publish.js");
 
     // Generate .npmrc
-    const npmrcContent = generateNpmrc();
-    fs.writeFileSync('.npmrc', npmrcContent);
-    console.log('✅ Generated .npmrc');
+    const npmrcContent = generateNpmrc(answers.repositoryUrl);
+    fs.writeFileSync(".npmrc", npmrcContent);
+    console.log("✅ Generated .npmrc");
 
-    // Initialize git repository if not exists
-    if (!fs.existsSync('.git')) {
-      execSync('git init', { stdio: 'inherit' });
-      console.log('✅ Initialized git repository');
+    // Generate main index.js file if it doesn't exist
+    if (!fs.existsSync("index.js")) {
+      const indexContent = generateIndexFile();
+      fs.writeFileSync("index.js", indexContent);
+      console.log("✅ Generated index.js");
     }
 
-    console.log('\n🎉 Package setup complete!');
-    console.log('To publish your package, run: npm run publish');
-    console.log('This will bump the version, publish to registries, and push to your repository.');
-    console.log('Note: Ensure GITHUB_TOKEN is set in your environment for GitHub Packages.');
+    // Initialize git repository if not exists
+    if (!fs.existsSync(".git")) {
+      try {
+        execSync("git init", { stdio: "inherit" });
+        console.log("✅ Initialized git repository");
+      } catch (err) {
+        console.log(
+          "⚠️  Could not initialize git repository. You may need to do this manually."
+        );
+      }
+    }
+
+    // Create .gitignore if it doesn't exist
+    if (!fs.existsSync(".gitignore")) {
+      const gitignoreContent = `node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+*.tgz
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+`;
+      fs.writeFileSync(".gitignore", gitignoreContent);
+      console.log("✅ Generated .gitignore");
+    }
+
+    console.log("\\n🎉 Package setup complete!");
+    console.log("\\n📋 Next steps:");
+    console.log(
+      "1. Set your GITHUB_TOKEN environment variable for GitHub Packages"
+    );
+    console.log('2. Run "npm install" to install dependencies');
+    console.log("3. Add your package code to index.js");
+    console.log('4. Run "npm run publish" to publish your package');
+    console.log("\\n💡 The publish script will:");
+    console.log("   - Automatically bump the patch version");
+    console.log("   - Publish to both npmjs.org and GitHub Packages");
+    console.log("   - Commit and push changes to your repository");
   } catch (err) {
-    console.error('❌ Error:', err.message);
+    console.error("❌ Error:", err.message);
     process.exit(1);
   }
 }
 
-if (process.argv[2] === 'publish') {
-  // If called with 'publish' argument, run the publish script
-  require('./publish.js');
-} else {
-  main();
-}
+// Run the main function
+main();
 
-module.exports = { promptPackageDetails, generatePackageJson, generatePublishScript, generateNpmrc };
+module.exports = {
+  promptPackageDetails,
+  generatePackageJson,
+  generatePublishScript,
+  generateNpmrc,
+};
