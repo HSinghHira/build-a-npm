@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const path = require("path");
 const { execSync } = require("child_process");
 
 // Dynamic import for inquirer (ES module)
@@ -105,9 +106,12 @@ function generatePackageJson(answers) {
     keywords: answers.keywords,
     scripts: {
       publish:
-        "node publish.js && git add -A && git commit -m 'Update' && git push",
+        "node node_modules/build-a-npm/publish.js && git add -A && git commit -m 'Update' && git push",
     },
-    dependencies: {},
+    dependencies: {
+      inquirer: "^12.9.0",
+      "build-a-npm": "^0.1.8",
+    },
     devDependencies: {},
     publishConfig: {
       registry: "https://npm.pkg.github.com/",
@@ -268,13 +272,15 @@ async function init() {
     fs.writeFileSync("package.json", packageJsonContent);
     console.log("✅ Generated package.json");
 
-    // Generate publish.js
+    // Create node_modules/build-a-npm directory and copy publish.js
+    const publishDir = path.join("node_modules", "build-a-npm");
+    fs.mkdirSync(publishDir, { recursive: true });
     const publishScriptContent = generatePublishScript(
       answers.name,
       answers.repositoryUrl
     );
-    fs.writeFileSync("publish.js", publishScriptContent);
-    console.log("✅ Generated publish.js");
+    fs.writeFileSync(path.join(publishDir, "publish.js"), publishScriptContent);
+    console.log("✅ Generated publish.js in node_modules/build-a-npm");
 
     // Generate .npmrc
     const npmrcContent = generateNpmrc(answers.repositoryUrl);
@@ -318,14 +324,24 @@ yarn-error.log*
       console.log("✅ Generated .gitignore");
     }
 
+    // Run npm install to install dependencies
+    try {
+      console.log("\n📦 Installing dependencies...");
+      execSync("npm install", { stdio: "inherit" });
+      console.log("✅ Dependencies installed successfully");
+    } catch (err) {
+      console.log(
+        "⚠️  Could not install dependencies automatically. Please run 'npm install' manually."
+      );
+    }
+
     console.log("\n🎉 Package setup complete!");
     console.log("\n📋 Next steps:");
     console.log(
       "1. Set your GITHUB_TOKEN environment variable for GitHub Packages"
     );
-    console.log('2. Run "npm install" to install dependencies');
-    console.log("3. Add your package code to index.js");
-    console.log('4. Run "npm run publish" to publish your package');
+    console.log("2. Add your package code to index.js");
+    console.log('3. Run "npm run publish" to publish your package');
     console.log("\n💡 The publish script will:");
     console.log("   - Automatically bump the patch version");
     console.log("   - Publish to both npmjs.org and GitHub Packages");
