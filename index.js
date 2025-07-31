@@ -4,16 +4,57 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
+// Dynamically resolve package.json
+let packageVersion = "unknown";
+try {
+  const packageJsonPath = require.resolve("build-a-npm/package.json");
+  packageVersion = require(packageJsonPath).version;
+} catch (err) {
+  console.warn("⚠️ Could not load package version:", err.message);
+}
+
 // Dynamic import for inquirer (ES module)
 async function getInquirer() {
   const inquirer = await import("inquirer");
   return inquirer.default;
 }
 
+// Check if terminal supports colors
+const supportsColor = process.stdout.isTTY && process.env.TERM !== "dumb";
+
+function colorize(text, code) {
+  return supportsColor ? `\x1b[${code}m${text}\x1b[0m` : text;
+}
+
 async function promptPackageDetails() {
   const inquirer = await getInquirer();
 
+  // Detect package manager from npm_config_user_agent
+  let detectedPackageManager = "npm";
+  const userAgent = process.env.npm_config_user_agent || "";
+  if (userAgent.includes("yarn")) detectedPackageManager = "Yarn";
+  else if (userAgent.includes("pnpm")) detectedPackageManager = "pnpm";
+  else if (userAgent.includes("bun")) detectedPackageManager = "Bun";
+
   const questions = [
+    {
+      type: "list",
+      name: "useNewDir",
+      message: "Create a new directory for your project?",
+      choices: ["Yes", "No"],
+      default: "Yes",
+    },
+    {
+      type: "input",
+      name: "projectDir",
+      message: "Enter the new directory name:",
+      when: (answers) => answers.useNewDir === "Yes",
+      validate: (input) => {
+        if (input.trim() === "") return "Directory name is required";
+        if (fs.existsSync(input)) return "Directory already exists";
+        return true;
+      },
+    },
     {
       type: "list",
       name: "publishTo",
@@ -26,7 +67,7 @@ async function promptPackageDetails() {
       name: "packageManager",
       message: "Which package manager do you want to use?",
       choices: ["npm", "Yarn", "pnpm", "Bun", "Other"],
-      default: "npm",
+      default: detectedPackageManager,
     },
     {
       type: "input",
@@ -52,6 +93,17 @@ async function promptPackageDetails() {
     },
     {
       type: "input",
+      name: "version",
+      message: "Enter initial version (e.g., 1.0.0):",
+      default: "0.0.1",
+      validate: (input) => {
+        if (!/^\d+\.\d+\.\d+$/.test(input))
+          return "Version must be in the format x.y.z (e.g., 1.0.0)";
+        return true;
+      },
+    },
+    {
+      type: "input",
       name: "githubUsername",
       message: "Enter your GitHub username:",
       when: (answers) =>
@@ -72,13 +124,17 @@ async function promptPackageDetails() {
     {
       type: "input",
       name: "githubToken",
-      message: "Enter your GitHub Personal Access Token (GITHUB_TOKEN):",
+      message:
+        "Enter your GitHub Personal Access Token (GITHUB_TOKEN) or 'NA' to skip:",
       when: (answers) =>
         ["GitHub Packages", "Both"].includes(answers.publishTo),
       validate: (input) => {
-        if (input.trim() === "") return "GitHub token is required";
+        input = input.trim();
+        if (input.toLowerCase() === "na") return true;
+        if (input === "")
+          return "GitHub token is required (or enter 'NA' to skip)";
         if (!/^(ghp_|ghf_)?[A-Za-z0-9_]{36,}$/.test(input))
-          return "Invalid GitHub token format. Ensure it's a valid Personal Access Token.";
+          return "Invalid GitHub token format. Ensure it's a valid Personal Access Token or enter 'NA' to skip.";
         return true;
       },
     },
@@ -101,12 +157,20 @@ async function promptPackageDetails() {
       type: "input",
       name: "authorUrl",
       message: "Enter author URL:",
+      filter: (input) => {
+        if (!input) return input;
+        return input.match(/^https?:\/\//) ? input : `https://${input}`;
+      },
     },
     {
       type: "input",
       name: "homepage",
       message: "Enter homepage URL:",
       when: (answers) => answers.publishTo !== "GitHub Packages",
+      filter: (input) => {
+        if (!input) return input;
+        return input.match(/^https?:\/\//) ? input : `https://${input}`;
+      },
     },
     {
       type: "input",
@@ -127,7 +191,15 @@ async function promptPackageDetails() {
     },
   ];
 
-  return await inquirer.prompt(questions);
+  const answers = await inquirer.prompt(questions);
+
+  // Change to new directory if specified
+  if (answers.useNewDir === "Yes") {
+    fs.mkdirSync(answers.projectDir);
+    process.chdir(answers.projectDir);
+  }
+
+  return answers;
 }
 
 function generatePackageJson(answers) {
@@ -156,7 +228,7 @@ function generatePackageJson(answers) {
 
   const packageJson = {
     name: packageName,
-    version: "0.0.1",
+    version: answers.version,
     author: {
       name: answers.authorName,
       email: answers.authorEmail,
@@ -253,6 +325,19 @@ function bumpVersion(version, type) {
   return parts.join('.');
 }
 
+function checkNpmLogin() {
+  try {
+    execSync('npm whoami', { stdio: 'pipe' });
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+function checkGitHubToken() {
+  return !!process.env.GITHUB_TOKEN || fs.existsSync('.npmrc');
+}
+
 const originalPackageJson = fs.readFileSync('package.json', 'utf-8');
 const originalPkg = JSON.parse(originalPackageJson);
 const args = process.argv.slice(2);
@@ -283,6 +368,7 @@ function publishVariant(name, registry) {
     console.log(\`✅ Published \${name}@\${newVersion} to \${registry}\`);
   } catch (err) {
     console.error(\`❌ Failed to publish \${name}:\`, err.message);
+    console.error(\`💡 Run \`npm login\` for npmjs or set GITHUB_TOKEN for GitHub Packages\`);
   }
 }
 
@@ -313,13 +399,25 @@ async function main() {
     return;
   }
 
-  if (publishNpmjs && (await confirmPublish('npmjs.com'))) {
-    publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
+  if (publishNpmjs) {
+    if (!checkNpmLogin()) {
+      console.error('❌ Not logged into npm. Run \`npm login\` and try again.');
+      process.exit(1);
+    }
+    if (await confirmPublish('npmjs.com')) {
+      publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
+    }
   }
 
-  if (publishGithub && (await confirmPublish('GitHub Packages'))) {
-    const scopedName = '${githubPackageName}';
-    publishVariant(scopedName, 'https://npm.pkg.github.com/');
+  if (publishGithub) {
+    if (!checkGitHubToken()) {
+      console.error('❌ GITHUB_TOKEN not set or .npmrc missing. Set GITHUB_TOKEN environment variable or configure .npmrc.');
+      process.exit(1);
+    }
+    if (await confirmPublish('GitHub Packages')) {
+      const scopedName = '${githubPackageName}';
+      publishVariant(scopedName, 'https://npm.pkg.github.com/');
+    }
   }
 
   // Restore original package.json
@@ -335,7 +433,8 @@ main().catch(err => {
 }
 
 function generateNpmrc(githubUsername, githubToken) {
-  if (!githubUsername || !githubToken) return "";
+  if (!githubUsername || !githubToken || githubToken.toLowerCase() === "na")
+    return "";
   return `//npm.pkg.github.com/:_authToken=${githubToken}
 @${githubUsername}:registry=https://npm.pkg.github.com/`;
 }
@@ -438,6 +537,69 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 `;
+  } else if (license === "Apache-2.0") {
+    return `Apache License, Version 2.0
+
+Copyright (c) ${year} ${authorName}
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+`;
+  } else if (license === "GPL-3.0") {
+    return `GNU General Public License, Version 3.0
+
+Copyright (c) ${year} ${authorName}
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+`;
+  } else if (license === "Unlicense") {
+    return `The Unlicense
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <https://unlicense.org>
+`;
   }
   return "";
 }
@@ -461,7 +623,12 @@ yarn-error.log*
 async function init(noGit) {
   try {
     const isWindows = process.platform === "win32";
-    console.log("🚀 Welcome to build-a-npm! Let's create your Node package.\n");
+    console.log(
+      colorize(
+        `🚀 Welcome to build-a-npm v${packageVersion}! Let's create your Node package.`,
+        "36"
+      ) + "\n"
+    );
 
     // Check if package.json already exists
     if (fs.existsSync("package.json")) {
@@ -476,7 +643,7 @@ async function init(noGit) {
       ]);
 
       if (!overwrite) {
-        console.log("⏹️  Cancelled. No files were modified.");
+        console.log(colorize("⏹️  Cancelled. No files were modified.", "33"));
         return;
       }
     }
@@ -487,7 +654,7 @@ async function init(noGit) {
     // Generate package.json
     const packageJsonContent = generatePackageJson(answers);
     fs.writeFileSync("package.json", packageJsonContent);
-    console.log("✅ Generated package.json");
+    console.log(colorize("✅ Generated package.json", "32"));
 
     // Create node_modules/build-a-npm directory and copy publish.js
     const publishDir = path.join("node_modules", "build-a-npm");
@@ -499,35 +666,40 @@ async function init(noGit) {
       answers.githubRepoName
     );
     fs.writeFileSync(path.join(publishDir, "publish.js"), publishScriptContent);
-    console.log("✅ Generated publish.js in node_modules/build-a-npm");
+    console.log(
+      colorize("✅ Generated publish.js in node_modules/build-a-npm", "32")
+    );
 
-    // Generate .npmrc if GitHub or Both selected
-    if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
+    // Generate .npmrc if GitHub or Both selected and token not skipped
+    if (
+      ["GitHub Packages", "Both"].includes(answers.publishTo) &&
+      answers.githubToken.toLowerCase() !== "na"
+    ) {
       const npmrcContent = generateNpmrc(
         answers.githubUsername,
         answers.githubToken
       );
       fs.writeFileSync(".npmrc", npmrcContent);
-      console.log("✅ Generated .npmrc");
+      console.log(colorize("✅ Generated .npmrc", "32"));
     }
 
     // Generate README.md
     const readmeContent = generateReadme(answers);
     fs.writeFileSync("README.md", readmeContent);
-    console.log("✅ Generated README.md");
+    console.log(colorize("✅ Generated README.md", "32"));
 
     // Generate LICENSE if applicable
     const licenseContent = generateLicense(answers.license, answers.authorName);
     if (licenseContent) {
       fs.writeFileSync("LICENSE", licenseContent);
-      console.log("✅ Generated LICENSE");
+      console.log(colorize("✅ Generated LICENSE", "32"));
     }
 
     // Generate main index.js file if it doesn't exist
     if (!fs.existsSync("index.js")) {
       const indexContent = generateIndexFile();
       fs.writeFileSync("index.js", indexContent);
-      console.log("✅ Generated index.js");
+      console.log(colorize("✅ Generated index.js", "32"));
     }
 
     // Initialize git repository if not exists and --no-git flag is not set
@@ -538,10 +710,13 @@ async function init(noGit) {
     ) {
       try {
         execSync("git init", { stdio: "inherit" });
-        console.log("✅ Initialized git repository");
+        console.log(colorize("✅ Initialized git repository", "32"));
       } catch (err) {
         console.log(
-          "⚠️  Could not initialize git repository. You may need to do this manually."
+          colorize(
+            "⚠️  Could not initialize git repository. You may need to do this manually.",
+            "33"
+          )
         );
       }
     }
@@ -550,7 +725,7 @@ async function init(noGit) {
     if (!fs.existsSync(".gitignore")) {
       const gitignoreContent = generateGitignore();
       fs.writeFileSync(".gitignore", gitignoreContent);
-      console.log("✅ Generated .gitignore");
+      console.log(colorize("✅ Generated .gitignore", "32"));
     }
 
     const packageManager =
@@ -560,43 +735,74 @@ async function init(noGit) {
     const installCommand =
       packageManager === "bun" ? packageManager : `${packageManager} install`;
 
-    console.log("\n🎉 Package setup complete!");
-    console.log("\n📋 Next steps:");
+    console.log("\n" + colorize("🎉 Package setup complete!", "1;36"));
+    console.log("\n" + colorize("📋 Next steps:", "1;36"));
     if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
-      console.log(
-        "1. Verify your GITHUB_TOKEN in .npmrc has the 'write:packages' scope"
-      );
+      if (answers.githubToken.toLowerCase() === "na") {
+        console.log(
+          colorize(
+            "1. Set your GITHUB_TOKEN environment variable for GitHub Packages",
+            "36"
+          )
+        );
+      } else {
+        console.log(
+          colorize(
+            "1. Verify your GITHUB_TOKEN in .npmrc has the 'write:packages' scope",
+            "36"
+          )
+        );
+      }
     }
-    console.log(`2. Run \`${installCommand}\` to install dependencies`);
+    console.log(
+      colorize(`2. Run \`${installCommand}\` to install dependencies`, "36")
+    );
     if (isWindows) {
       console.log(
-        "   - On Windows, run commands in an Administrator Command Prompt to avoid permissions errors"
+        colorize(
+          "   - On Windows, run commands in an Administrator Command Prompt to avoid permissions errors",
+          "33"
+        )
       );
     } else {
       console.log(
-        "   - Ensure you have write permissions for the project directory"
+        colorize(
+          "   - Ensure you have write permissions for the project directory",
+          "33"
+        )
       );
     }
-    console.log("3. Add your package code to index.js");
+    console.log(colorize("3. Add your package code to index.js", "36"));
     console.log(
-      `4. Run \`${
-        packageManager === "bun" ? "bun" : `${packageManager} run`
-      } publish\` to publish your package`
+      colorize(
+        `4. Run \`${
+          packageManager === "bun" ? "bun" : `${packageManager} run`
+        } publish\` to publish your package`,
+        "36"
+      )
     );
-    console.log("\n💡 The publish script will:");
+    console.log("\n" + colorize("💡 The publish script will:", "1;36"));
     console.log(
-      "   - Automatically bump the patch version (use :minor or :major for other bumps)"
+      colorize(
+        "   - Automatically bump the patch version (use :minor or :major for other bumps)",
+        "36"
+      )
     );
     console.log(
-      `   - Publish to ${
-        answers.publishTo === "Both"
-          ? "both npmjs.org and GitHub Packages"
-          : answers.publishTo
-      }`
+      colorize(
+        `   - Publish to ${
+          answers.publishTo === "Both"
+            ? "both npmjs.org and GitHub Packages"
+            : answers.publishTo
+        }`,
+        "36"
+      )
     );
-    console.log("   - Commit and push changes to your repository");
+    console.log(
+      colorize("   - Commit and push changes to your repository", "36")
+    );
   } catch (err) {
-    console.error("❌ Error:", err.message);
+    console.error(colorize("❌ Error:", "31"), err.message);
     process.exit(1);
   }
 }
@@ -607,16 +813,20 @@ async function main() {
   if (args.includes("init")) {
     await init(noGit);
   } else {
-    console.log("Usage: npx build-a-npm init [--no-git]");
-    console.log('Run "build-a-npm init" to create a new Node package.');
-    console.log("Use --no-git to skip git repository initialization.");
+    console.log(colorize("Usage: npx build-a-npm init [--no-git]", "36"));
+    console.log(
+      colorize('Run "build-a-npm init" to create a new Node package.', "36")
+    );
+    console.log(
+      colorize("Use --no-git to skip git repository initialization.", "36")
+    );
     process.exit(1);
   }
 }
 
 // Run the main function
 main().catch((err) => {
-  console.error("❌ Error:", err.message);
+  console.error(colorize("❌ Error:", "31"), err.message);
   process.exit(1);
 });
 
