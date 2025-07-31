@@ -238,7 +238,7 @@ module.exports = {
 `;
 }
 
-async function main() {
+async function init() {
   try {
     console.log("🚀 Welcome to build-a-npm! Let's create your Node package.\n");
 
@@ -336,10 +336,25 @@ yarn-error.log*
   }
 }
 
+async function main() {
+  const args = process.argv.slice(2);
+  if (args[0] === "init") {
+    await init();
+  } else {
+    console.log("Usage: npx build-a-npm init");
+    console.log('Run "build-a-npm init" to create a new Node package.');
+    process.exit(1);
+  }
+}
+
 // Run the main function
-main();
+main().catch((err) => {
+  console.error("❌ Error:", err.message);
+  process.exit(1);
+});
 
 module.exports = {
+  init,
   promptPackageDetails,
   generatePackageJson,
   generatePublishScript,
