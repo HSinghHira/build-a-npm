@@ -15,7 +15,7 @@
     "publish:patch": "node node_modules/build-a-npm/publish.js --github --npmjs",
     "publish:minor": "node node_modules/build-a-npm/publish.js --github --npmjs --minor",
     "publish:major": "node node_modules/build-a-npm/publish.js --github --npmjs --major",
-    "do": "node publish.js --github --npmjs && npm run github"
+    "do": "node publish.js --github --npmjs --minor && npm run github"
   },
   "dependencies": {
     "inquirer": "*"
