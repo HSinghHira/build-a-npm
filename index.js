@@ -475,11 +475,6 @@ yarn-error.log*
 }
 
 function generateGitHubWorkflow(answers) {
-  const isGitHub = ["GitHub Packages", "Both"].includes(answers.publishTo);
-  const npmjsPublish =
-    answers.publishTo === "npmjs" || answers.publishTo === "Both";
-  const githubPublish = isGitHub;
-
   return `name: Publish Package
 
 on:
@@ -492,61 +487,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        token: \${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: \${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        registry-url: ${
-          isGitHub
-            ? "'https://npm.pkg.github.com/'"
-            : "'https://registry.npmjs.org/'"
-        }
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com/"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Determine version bump
-      id: version
-      run: |
-        COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-        if [[ "$COMMIT_MESSAGE" =~ "major" ]]; then
-          echo "version_type=major" >> $GITHUB_OUTPUT
-        elif [[ "$COMMIT_MESSAGE" =~ "minor" ]]; then
-          echo "version_type=minor" >> $GITHUB_OUTPUT
-        else
-          echo "version_type=patch" >> $GITHUB_OUTPUT
-        fi
+      - name: Determine version bump
+        id: version
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MESSAGE" =~ "major" ]]; then
+            echo "version_type=major" >> $GITHUB_OUTPUT
+          elif [[ "$COMMIT_MESSAGE" =~ "minor" ]]; then
+            echo "version_type=minor" >> $GITHUB_OUTPUT
+          else
+            echo "version_type=patch" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Bump version
-      run: |
-        node node_modules/build-a-npm/publish.js --${"${{ steps.version.outputs.version_type }}"} --npmjs${
-    isGitHub ? " --github" : ""
-  }
+      - name: Bump version and publish
+        env:
+          NPM_TOKEN: \${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node node_modules/build-a-npm/publish.js --\${{ steps.version.outputs.version_type }} --npmjs --github
 
-    - name: Commit and push version bump
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git add package.json
-        git commit -m "Bump version to $(node -p -e "require('./package.json').version")"
-        git push
+      - name: Commit and push version bump if changed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add package.json
 
-    - name: Publish to npmjs
-      if: ${npmjsPublish}
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
-
-    - name: Publish to GitHub Packages
-      if: ${githubPublish}
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            VERSION=$(node -p -e "require('./package.json').version")
+            git commit -m "Bump version to $VERSION"
+            git push
+          fi
 `;
 }
 
