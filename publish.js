@@ -69,9 +69,14 @@ if (publishToGithub) {
   publishVariant("@hsinghhira/build-a-npm", "https://npm.pkg.github.com/");
 }
 
-// Step 5: Restore original package.json
-fs.writeFileSync("package.json", originalJson);
-console.log("\n🔄 package.json restored to original state.");
+// Step 5: Restore original package.json but keep the bumped version
+const restoredPkg = {
+  ...originalPkg,
+  version: bumpedVersion, // Keep the new version
+};
+fs.writeFileSync("package.json", JSON.stringify(restoredPkg, null, 2));
+console.log(
+  `\n🔄 package.json restored to original state with version ${bumpedVersion}.`
+);
 console.log("✅ Publishing process completed successfully.");
 console.log("🚀 Ready for the next steps!");
-// Exit the process
