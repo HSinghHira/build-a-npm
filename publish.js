@@ -3,40 +3,32 @@ const { execSync } = require("child_process");
 
 const args = process.argv.slice(2);
 
-const isPatch = args.includes("--patch");
-const isMinor = args.includes("--minor");
-const isMajor = args.includes("--major");
-
+const bumpType = args.find((arg) =>
+  ["--patch", "--minor", "--major"].includes(arg)
+);
 const publishToNpmjs = args.includes("--npmjs");
 const publishToGithub = args.includes("--github");
 
-if (!isPatch && !isMinor && !isMajor) {
+if (!bumpType) {
   console.error(
-    "❌ No version bump type provided. Use --patch, --minor, or --major."
+    "❌ Missing version bump type. Use --patch, --minor, or --major."
   );
   process.exit(1);
 }
 
-function bumpVersion(version) {
-  const parts = version.split(".").map(Number);
-  if (isMajor) {
-    parts[0]++;
-    parts[1] = 0;
-    parts[2] = 0;
-  } else if (isMinor) {
-    parts[1]++;
-    parts[2] = 0;
-  } else {
-    parts[2]++;
-  }
-  return parts.join(".");
-}
-
-// Load and bump
+// Load original package.json
 const originalJson = fs.readFileSync("package.json", "utf8");
 const originalPkg = JSON.parse(originalJson);
-const newVersion = bumpVersion(originalPkg.version);
 
+// Bump version
+function bumpVersion(version, type) {
+  const [major, minor, patch] = version.split(".").map(Number);
+  if (type === "--major") return `${major + 1}.0.0`;
+  if (type === "--minor") return `${major}.${minor + 1}.0`;
+  return `${major}.${minor}.${patch + 1}`; // default: patch
+}
+
+const newVersion = bumpVersion(originalPkg.version, bumpType);
 console.log(`🔧 Bumping version: ${originalPkg.version} → ${newVersion}`);
 originalPkg.version = newVersion;
 fs.writeFileSync("package.json", JSON.stringify(originalPkg, null, 2));
@@ -64,7 +56,7 @@ function publishVariant(name, registry) {
   }
 }
 
-// Publish
+// Run publishes
 if (publishToNpmjs) {
   publishVariant("build-a-npm", "https://registry.npmjs.org/");
 }
