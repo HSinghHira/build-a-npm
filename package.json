@@ -1,5 +1,5 @@
 {
-  "name": "@hsinghhira/build-a-npm",
+  "name": "build-a-npm",
   "version": "0.2.14",
   "author": {
     "name": "Harman Singh Hira",
@@ -45,7 +45,7 @@
     "npmjs"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/",
+    "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "files": [
