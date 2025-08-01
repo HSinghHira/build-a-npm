@@ -1,6 +1,6 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -15,8 +15,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "github": "git add -A && git commit -m \"Building\" && git push",
-    "publish": "npm run github && npm run publish:patch",
-    "publish:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "publish": "npm run publish:patch",
+    "publish:patch": "npm run github && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
     "publish:minor": "npm run github && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
     "publish:major": "npm run github && node node_modules/build-a-npm/publish.js --major --github --npmjs",
     "do": "node publish.js --patch --github --npmjs && npm run github"
@@ -51,6 +51,7 @@
   "files": [
     "index.js",
     "publish.js",
-    "lib"
+    "lib",
+    "config.template.json"
   ]
 }

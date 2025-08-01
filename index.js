@@ -17,15 +17,21 @@ async function main() {
   const args = process.argv.slice(2);
   const noGit = args.includes("--no-git");
   const useSample = args.includes("--sample");
+  const verbose = args.includes("--verbose");
+  const configIndex = args.indexOf("--config");
+  const configPath = configIndex !== -1 ? args[configIndex + 1] : null;
 
   if (args.includes("init")) {
-    await init(noGit, useSample, packageVersion);
+    await init(noGit, useSample, packageVersion, verbose, configPath);
   } else if (args.includes("upgrade")) {
-    await upgrade(packageVersion);
+    await upgrade(packageVersion, verbose);
   } else {
     console.log(colorize("Usage: npx build-a-npm <command>", "36"));
     console.log(
-      colorize("Available commands: init [--no-git] [--sample], upgrade", "36")
+      colorize(
+        "Available commands: init [--no-git] [--sample] [--verbose] [--config <path>], upgrade [--verbose]",
+        "36"
+      )
     );
     console.log(
       colorize('Run "build-a-npm init" to create a new Node package.', "36")
@@ -33,6 +39,12 @@ async function main() {
     console.log(
       colorize(
         'Run "build-a-npm init --sample" to create a package with sample data.',
+        "36"
+      )
+    );
+    console.log(
+      colorize(
+        'Run "build-a-npm init --config <path>" to use a configuration file.',
         "36"
       )
     );
@@ -48,6 +60,7 @@ async function main() {
         "36"
       )
     );
+    console.log(colorize("Use --verbose to enable detailed logging.", "36"));
     process.exit(1);
   }
 }
