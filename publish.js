@@ -3,18 +3,18 @@ const { execSync } = require("child_process");
 
 const args = process.argv.slice(2);
 
-const bumpType = args.find((arg) =>
+let bumpType = args.find((arg) =>
   ["--patch", "--minor", "--major"].includes(arg)
 );
+
+// Default to patch if no bump type is specified
+if (!bumpType) {
+  bumpType = "--patch";
+  console.log("ℹ️  No version bump type specified, defaulting to --patch");
+}
+
 const publishToNpmjs = args.includes("--npmjs");
 const publishToGithub = args.includes("--github");
-
-if (!bumpType) {
-  console.error(
-    "❌ Missing version bump type. Use --patch, --minor, or --major."
-  );
-  process.exit(1);
-}
 
 // Step 1: Load original package.json
 const originalJson = fs.readFileSync("package.json", "utf8");
@@ -70,3 +70,5 @@ if (publishToGithub) {
 // Step 5: Restore original package.json
 fs.writeFileSync("package.json", originalJson);
 console.log("\n🔄 package.json restored to original state.");
+console.log("✅ Publishing process completed successfully.");
+console.log("🚀 Ready for the next steps!");
