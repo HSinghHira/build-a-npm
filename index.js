@@ -217,7 +217,6 @@ function generatePackageJson(answers) {
     main: "index.js",
     license: answers.license,
     scripts: {
-      test: "jest",
       publish: isGitHub
         ? "npm run publish:patch && npm run github"
         : "npm run publish:patch",
@@ -232,11 +231,10 @@ function generatePackageJson(answers) {
       } --major`,
     },
     dependencies: {
-      inquirer: "^12.9.0",
-      "build-a-npm": "^0.1.8",
+      inquirer: "*",
     },
     devDependencies: {
-      jest: "^29.7.0",
+      "build-a-npm": "*",
     },
   };
 
@@ -503,10 +501,6 @@ Run \`npm run publish\` to publish to ${
   }.
 Use \`npm run publish:minor\` or \`:major\` for minor or major version bumps.
 
-## Testing
-
-Run \`npm test\` to execute the test suite using Jest.
-
 ## License
 
 ${answers.license}
@@ -635,21 +629,6 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .npmrc
-coverage/
-`;
-}
-
-function generateTestFile() {
-  return `const { hello } = require('../index');
-
-describe('Package Functionality', () => {
-  test('hello function logs Hello World', () => {
-    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    hello();
-    expect(consoleLogSpy).toHaveBeenCalledWith('Hello World!');
-    consoleLogSpy.mockRestore();
-  });
-});
 `;
 }
 
@@ -811,13 +790,6 @@ async function init(noGit) {
       console.log(colorize("✅ Generated index.js", "32"));
     }
 
-    // Generate test file
-    const testDir = path.join("test");
-    fs.mkdirSync(testDir, { recursive: true });
-    const testContent = generateTestFile();
-    fs.writeFileSync(path.join(testDir, "index.test.js"), testContent);
-    console.log(colorize("✅ Generated test/index.test.js", "32"));
-
     // Generate GitHub Actions workflow if GitHub or Both selected
     if (["GitHub Packages", "Both"].includes(answers.publishTo)) {
       const workflowDir = path.join(".github", "workflows");
@@ -911,9 +883,8 @@ async function init(noGit) {
       );
     }
     console.log(colorize("4. Add your package code to index.js", "36"));
-    console.log(colorize("5. Run `npm test` to run tests", "36"));
     console.log(
-      colorize(`6. Run \`npm run publish\` to publish your package`, "36")
+      colorize(`5. Run \`npm run publish\` to publish your package`, "36")
     );
     console.log("\n" + colorize("💡 The publish script will:", "1;36"));
     console.log(
@@ -985,6 +956,5 @@ module.exports = {
   generateReadme,
   generateLicense,
   generateGitignore,
-  generateTestFile,
   generateGitHubWorkflow,
 };

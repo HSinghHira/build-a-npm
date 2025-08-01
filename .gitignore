@@ -14,3 +14,4 @@ yarn-error.log*
 bun.lockb
 pnpm-lock.yaml
 .gitignore
+publish.js
