@@ -1,0 +1,48 @@
+{
+  "name": "@hsinghhira/build-a-npm",
+  "version": "0.2.3",
+  "author": {
+    "name": "Harman Singh Hira",
+    "url": "https://me.hsinghhira.me"
+  },
+  "description": "A tool to create and publish Node packages with automatic version bumping",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "github": "git add -A && git commit -m \"Building\" && git push",
+    "publish": "npm run publish:patch && npm run github",
+    "publish:patch": "node node_modules/build-a-npm/publish.js --github --npmjs",
+    "publish:minor": "node node_modules/build-a-npm/publish.js --github --npmjs --minor",
+    "publish:major": "node node_modules/build-a-npm/publish.js --github --npmjs --major"
+  },
+  "dependencies": {
+    "inquirer": "^12.9.0",
+    "build-a-npm": "^0.1.8"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsinghhira/build-a-npm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hsinghhira/build-a-npm/issues"
+  },
+  "keywords": [
+    "npm",
+    "package",
+    "scaffold",
+    "cli",
+    "generator",
+    "publish",
+    "github-packages",
+    "npmjs"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "access": "public"
+  },
+  "files": [
+    "index.js"
+  ]
+}
