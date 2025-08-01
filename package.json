@@ -1,12 +1,16 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
   },
   "description": "A tool to create and publish Node packages with automatic version bumping",
   "main": "index.js",
+  "bin": {
+    "build-a-npm": "./index.js"
+  },
+  "homepage": "https://github.com/hsinghhira/build-a-npm",
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
