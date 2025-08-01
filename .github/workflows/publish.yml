@@ -43,10 +43,16 @@ jobs:
         run: |
           node node_modules/build-a-npm/publish.js --${{ steps.version.outputs.version_type }} --npmjs --github
 
-      - name: Commit and push version bump
+      - name: Commit and push version bump if changed
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add package.json
-          git commit -m "Bump version to $(node -p -e "require('./package.json').version")"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            VERSION=$(node -p -e "require('./package.json').version")
+            git commit -m "Bump version to $VERSION"
+            git push
+          fi
