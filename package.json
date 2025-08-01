@@ -1,6 +1,6 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -19,7 +19,7 @@
     "publish:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
     "publish:minor": "node node_modules/build-a-npm/publish.js --minor --github --npmjs",
     "publish:major": "node node_modules/build-a-npm/publish.js --major --github --npmjs",
-    "do": "node publish.js --minor --github --npmjs && npm run github"
+    "do": "node publish.js --patch --github --npmjs && npm run github"
   },
   "dependencies": {
     "inquirer": "*"
