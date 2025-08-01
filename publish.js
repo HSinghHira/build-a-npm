@@ -30,6 +30,8 @@ function bumpVersion(version, type) {
 
 const newVersion = bumpVersion(originalPkg.version, bumpType);
 console.log(`🔧 Bumping version: ${originalPkg.version} → ${newVersion}`);
+
+// Save bumped version to package.json
 originalPkg.version = newVersion;
 fs.writeFileSync("package.json", JSON.stringify(originalPkg, null, 2));
 
@@ -38,7 +40,6 @@ function publishVariant(name, registry) {
   const pkg = {
     ...originalPkg,
     name,
-    version: newVersion,
     publishConfig: {
       registry,
       access: "public",
@@ -65,6 +66,6 @@ if (publishToGithub) {
   publishVariant("@hsinghhira/build-a-npm", "https://npm.pkg.github.com/");
 }
 
-// Restore original package.json
+// Restore original package.json (with old version and unscoped name)
 fs.writeFileSync("package.json", originalJson);
 console.log("\n🔄 package.json restored to original state.");
