@@ -338,6 +338,18 @@ function checkGitHubToken() {
   return false;
 }
 
+function commitVersion(newVersion) {
+  try {
+    execSync('git add package.json', { stdio: 'inherit' });
+    execSync(\`git commit -m "Bump version to \${newVersion}"\`, { stdio: 'inherit' });
+    execSync('git push', { stdio: 'inherit' });
+    console.log(\`✅ Committed and pushed version \${newVersion}\`);
+  } catch (err) {
+    console.error(\`❌ Failed to commit version \${newVersion}: \${err.message}\`);
+    throw err;
+  }
+}
+
 const originalPackageJson = fs.readFileSync('package.json', 'utf-8');
 const originalPkg = JSON.parse(originalPackageJson);
 const args = process.argv.slice(2);
@@ -401,6 +413,9 @@ async function main() {
   }
 
   try {
+    // Commit the version bump
+    commitVersion(newVersion);
+
     if (publishNpmjs) {
       if (!checkNpmLogin()) {
         console.error('❌ Please authenticate with npm before publishing.');
@@ -647,8 +662,9 @@ function generateGitHubWorkflow(answers) {
   return `name: Publish Package
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 jobs:
   publish:
@@ -657,6 +673,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: \${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -670,6 +688,32 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Determine version bump
+      id: version
+      run: |
+        COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+        if [[ "$COMMIT_MESSAGE" =~ "major" ]]; then
+          echo "version_type=major" >> $GITHUB_OUTPUT
+        elif [[ "$COMMIT_MESSAGE" =~ "minor" ]]; then
+          echo "version_type=minor" >> $GITHUB_OUTPUT
+        else
+          echo "version_type=patch" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Bump version
+      run: |
+        node node_modules/build-a-npm/publish.js --${"${{ steps.version.outputs.version_type }}"} --npmjs ${
+    isGitHub ? "--github" : ""
+  }
+
+    - name: Commit and push version bump
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add package.json
+        git commit -m "Bump version to $(node -p -e "require('./package.json').version")"
+        git push
 
     - name: Publish to npmjs
       if: ${npmjsPublish}

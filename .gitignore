@@ -13,3 +13,4 @@ yarn-error.log*
 .vscode
 bun.lockb
 pnpm-lock.yaml
+.gitignore
