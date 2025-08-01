@@ -45,6 +45,8 @@ function publishVariant(name, registry) {
       registry,
       access: "public",
     },
+    // Remove scripts to prevent infinite loops
+    scripts: {},
   };
 
   fs.writeFileSync("package.json", JSON.stringify(modifiedPkg, null, 2));
@@ -72,3 +74,4 @@ fs.writeFileSync("package.json", originalJson);
 console.log("\n🔄 package.json restored to original state.");
 console.log("✅ Publishing process completed successfully.");
 console.log("🚀 Ready for the next steps!");
+// Exit the process
