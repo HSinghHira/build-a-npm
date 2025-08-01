@@ -11,3 +11,5 @@ yarn-error.log*
 .env.production.local
 .npmrc
 .vscode
+bun.lockb
+pnpm-lock.yaml
