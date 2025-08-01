@@ -187,6 +187,26 @@ async function promptPackageDetails() {
   return answers;
 }
 
+function generateSampleAnswers() {
+  return {
+    useNewDir: "Yes",
+    projectDir: "sample-package",
+    publishTo: "Both",
+    name: "sample-package",
+    version: "0.0.1",
+    githubUsername: "sampleuser",
+    githubRepoName: "sample-package",
+    githubToken: "NA",
+    description: "A sample Node.js package",
+    authorName: "Sample Author",
+    authorEmail: "sample@example.com",
+    authorUrl: "https://example.com",
+    homepage: "https://example.com/sample-package",
+    keywords: ["sample", "node", "package"],
+    license: "MIT",
+  };
+}
+
 function generatePackageJson(answers) {
   const isGitHub = ["GitHub Packages", "Both"].includes(answers.publishTo);
   const repositoryUrl = isGitHub
@@ -274,184 +294,6 @@ function generatePackageJson(answers) {
     delete packageJson.keywords;
 
   return JSON.stringify(packageJson, null, 2);
-}
-
-function generatePublishScript(
-  publishTo,
-  packageName,
-  githubUsername,
-  githubRepoName
-) {
-  const owner = githubUsername || "owner";
-  const githubPackageName = packageName.startsWith("@")
-    ? packageName
-    : `@${owner}/${packageName}`;
-
-  return `#!/usr/bin/env node
-const fs = require('fs');
-const { execSync } = require('child_process');
-
-// Dynamic import for inquirer
-async function getInquirer() {
-  const inquirer = await import('inquirer');
-  return inquirer.default;
-}
-
-function bumpVersion(version, type) {
-  const parts = version.split('.').map(Number);
-  if (type === 'major') {
-    parts[0] += 1;
-    parts[1] = 0;
-    parts[2] = 0;
-  } else if (type === 'minor') {
-    parts[1] += 1;
-    parts[2] = 0;
-  } else {
-    parts[2] += 1; // Patch
-  }
-  return parts.join('.');
-}
-
-function checkNpmLogin() {
-  try {
-    execSync('npm whoami', { stdio: 'pipe' });
-    return true;
-  } catch (err) {
-    console.error('❌ Not logged into npm. Please run \`npm login\` to authenticate.');
-    return false;
-  }
-}
-
-function checkGitHubToken() {
-  if (fs.existsSync('.npmrc')) {
-    const npmrcContent = fs.readFileSync('.npmrc', 'utf-8');
-    if (npmrcContent.includes('npm.pkg.github.com') && npmrcContent.includes('_authToken')) {
-      return true;
-    }
-  }
-  if (process.env.GITHUB_TOKEN) {
-    return true;
-  }
-  console.error('❌ GITHUB_TOKEN not set or .npmrc missing. Please set GITHUB_TOKEN environment variable or configure .npmrc with a valid GitHub token.');
-  return false;
-}
-
-function commitVersion(newVersion) {
-  try {
-    execSync('git add package.json', { stdio: 'inherit' });
-    execSync(\`git commit -m "Bump version to \${newVersion}"\`, { stdio: 'inherit' });
-    execSync('git push', { stdio: 'inherit' });
-    console.log(\`✅ Committed and pushed version \${newVersion}\`);
-  } catch (err) {
-    console.error(\`❌ Failed to commit version \${newVersion}: \${err.message}\`);
-    throw err;
-  }
-}
-
-const originalPackageJson = fs.readFileSync('package.json', 'utf-8');
-const originalPkg = JSON.parse(originalPackageJson);
-const args = process.argv.slice(2);
-const versionType = args.includes('--major') ? 'major' : args.includes('--minor') ? 'minor' : 'patch';
-const newVersion = bumpVersion(originalPkg.version, versionType);
-
-// Update package.json with new version
-const updatedPkg = { ...originalPkg, version: newVersion };
-fs.writeFileSync('package.json', JSON.stringify(updatedPkg, null, 2));
-console.log(\`\\n🚀 Bumped version from \${originalPkg.version} to \${newVersion}\`);
-
-function publishVariant(name, registry) {
-  const pkg = {
-    ...updatedPkg,
-    name,
-    version: newVersion,
-    publishConfig: {
-      registry,
-      access: 'public',
-    },
-  };
-
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-  console.log(\`\\n📦 Publishing \${name}@\${newVersion} to \${registry}\`);
-
-  try {
-    execSync(\`npm publish --registry=\${registry}\`, { stdio: 'inherit' });
-    console.log(\`✅ Published \${name}@\${newVersion} to \${registry}\`);
-  } catch (err) {
-    console.error(\`❌ Failed to publish \${name} to \${registry}: \${err.message}\`);
-    console.error(\`💡 Ensure you have the correct permissions and are authenticated. Run \`npm login\` for npmjs or verify your GITHUB_TOKEN for GitHub Packages.\`);
-    throw err;
-  }
-}
-
-async function confirmPublish(registry) {
-  const inquirer = await getInquirer();
-  const { confirm } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: \`Publish new version \${newVersion} to \${registry}?\`,
-      default: true
-    }
-  ]);
-  return confirm;
-}
-
-async function main() {
-  const publishNpmjs = args.includes('--npmjs') || ${
-    publishTo === "Both" || publishTo === "npmjs"
-  };
-  const publishGithub = args.includes('--github') || ${
-    publishTo === "Both" || publishTo === "GitHub Packages"
-  };
-
-  if (!publishNpmjs && !publishGithub) {
-    console.log('No publish targets specified.');
-    fs.writeFileSync('package.json', originalPackageJson);
-    return;
-  }
-
-  try {
-    // Commit the version bump
-    commitVersion(newVersion);
-
-    if (publishNpmjs) {
-      if (!checkNpmLogin()) {
-        console.error('❌ Please authenticate with npm before publishing.');
-        process.exit(1);
-      }
-      if (await confirmPublish('npmjs.com')) {
-        publishVariant(originalPkg.name, 'https://registry.npmjs.org/');
-      }
-    }
-
-    if (publishGithub) {
-      if (!checkGitHubToken()) {
-        console.error('❌ Please set a valid GITHUB_TOKEN or configure .npmrc correctly.');
-        process.exit(1);
-      }
-      if (await confirmPublish('GitHub Packages')) {
-        const scopedName = '${githubPackageName}';
-        publishVariant(scopedName, 'https://npm.pkg.github.com/');
-      }
-    }
-
-    // Restore original package.json
-    fs.writeFileSync('package.json', originalPackageJson);
-    console.log('\\n🔄 package.json restored to original state.');
-  } catch (err) {
-    console.error('❌ Publishing failed:', err.message);
-    fs.writeFileSync('package.json', originalPackageJson);
-    console.log('\\n🔄 package.json restored to original state.');
-    process.exit(1);
-  }
-}
-
-main().catch(err => {
-  console.error('❌ Error:', err.message);
-  console.error('💡 Check your network connection, authentication credentials, or file permissions.');
-  process.exit(1);
-});
-`;
 }
 
 function generateNpmrc(githubUsername, githubToken) {
@@ -682,8 +524,8 @@ jobs:
 
     - name: Bump version
       run: |
-        node node_modules/build-a-npm/publish.js --${"${{ steps.version.outputs.version_type }}"} --npmjs ${
-    isGitHub ? "--github" : ""
+        node node_modules/build-a-npm/publish.js --${"${{ steps.version.outputs.version_type }}"} --npmjs${
+    isGitHub ? " --github" : ""
   }
 
     - name: Commit and push version bump
@@ -708,7 +550,7 @@ jobs:
 `;
 }
 
-async function init(noGit) {
+async function init(noGit, useSample) {
   try {
     const isWindows = process.platform === "win32";
     console.log(
@@ -736,8 +578,22 @@ async function init(noGit) {
       }
     }
 
-    // Prompt for package details
-    const answers = await promptPackageDetails();
+    // Use sample data or prompt for details
+    const answers = useSample
+      ? generateSampleAnswers()
+      : await promptPackageDetails();
+
+    // Change to new directory if specified
+    if (answers.useNewDir === "Yes") {
+      if (fs.existsSync(answers.projectDir)) {
+        console.error(
+          colorize(`❌ Directory ${answers.projectDir} already exists.`, "31")
+        );
+        process.exit(1);
+      }
+      fs.mkdirSync(answers.projectDir);
+      process.chdir(answers.projectDir);
+    }
 
     // Generate package.json
     const packageJsonContent = generatePackageJson(answers);
@@ -747,15 +603,12 @@ async function init(noGit) {
     // Create node_modules/build-a-npm directory and copy publish.js
     const publishDir = path.join("node_modules", "build-a-npm");
     fs.mkdirSync(publishDir, { recursive: true });
-    const publishScriptContent = generatePublishScript(
-      answers.publishTo,
-      answers.name,
-      answers.githubUsername,
-      answers.githubRepoName
+    fs.copyFileSync(
+      path.join(__dirname, "publish.js"),
+      path.join(publishDir, "publish.js")
     );
-    fs.writeFileSync(path.join(publishDir, "publish.js"), publishScriptContent);
     console.log(
-      colorize("✅ Generated publish.js in node_modules/build-a-npm", "32")
+      colorize("✅ Copied publish.js to node_modules/build-a-npm", "32")
     );
 
     // Generate .npmrc if GitHub or Both selected and token not skipped
@@ -918,18 +771,234 @@ async function init(noGit) {
   }
 }
 
+async function upgrade() {
+  try {
+    console.log(
+      colorize(
+        `🚀 Upgrading package with build-a-npm v${packageVersion}`,
+        "36"
+      ) + "\n"
+    );
+
+    // Check if package.json exists
+    if (!fs.existsSync("package.json")) {
+      console.error(
+        colorize("❌ No package.json found in the current directory.", "31")
+      );
+      console.log(
+        colorize(
+          "💡 Run this command in a directory with an existing package.json or use `npx build-a-npm init` to create a new package.",
+          "33"
+        )
+      );
+      process.exit(1);
+    }
+
+    // Read existing package.json
+    const existingPackageJson = JSON.parse(
+      fs.readFileSync("package.json", "utf-8")
+    );
+
+    // Check if build-a-npm is in devDependencies
+    if (
+      !existingPackageJson.devDependencies ||
+      !existingPackageJson.devDependencies["build-a-npm"]
+    ) {
+      console.error(
+        colorize(
+          "❌ This package does not use build-a-npm as a devDependency.",
+          "31"
+        )
+      );
+      console.log(
+        colorize(
+          "💡 Ensure `build-a-npm` is listed in devDependencies in package.json.",
+          "33"
+        )
+      );
+      process.exit(1);
+    }
+
+    // Prompt for confirmation
+    const inquirer = await getInquirer();
+    const { confirm } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "confirm",
+        message:
+          "Update this package with the latest build-a-npm features? This will modify package.json, add missing files, and update scripts.",
+        default: true,
+      },
+    ]);
+
+    if (!confirm) {
+      console.log(colorize("⏹️  Cancelled. No files were modified.", "33"));
+      return;
+    }
+
+    // Determine publishTo based on existing package.json
+    const isGitHub =
+      existingPackageJson.publishConfig?.registry?.includes(
+        "npm.pkg.github.com"
+      );
+    const publishTo = isGitHub
+      ? existingPackageJson.publishConfig?.registry?.includes(
+          "registry.npmjs.org"
+        )
+        ? "Both"
+        : "GitHub Packages"
+      : "npmjs";
+
+    // Generate answers based on existing package.json
+    const answers = {
+      publishTo,
+      name: existingPackageJson.name,
+      version: existingPackageJson.version,
+      githubUsername: isGitHub
+        ? existingPackageJson.name.split("/")[0]?.replace("@", "")
+        : "sampleuser",
+      githubRepoName:
+        existingPackageJson.repository?.url
+          ?.split("/")
+          .slice(-1)[0]
+          ?.replace(".git", "") || "sample-package",
+      githubToken: "NA",
+      description: existingPackageJson.description || "",
+      authorName:
+        existingPackageJson.author?.name ||
+        existingPackageJson.author ||
+        "Sample Author",
+      authorEmail: existingPackageJson.author?.email || "",
+      authorUrl: existingPackageJson.author?.url || "",
+      homepage: existingPackageJson.homepage || "",
+      keywords: existingPackageJson.keywords || [],
+      license: existingPackageJson.license || "MIT",
+    };
+
+    // Update package.json scripts and devDependencies
+    const updatedPackageJson = JSON.parse(generatePackageJson(answers));
+    existingPackageJson.scripts = {
+      ...existingPackageJson.scripts,
+      ...updatedPackageJson.scripts,
+    };
+    existingPackageJson.devDependencies = {
+      ...existingPackageJson.devDependencies,
+      "build-a-npm": "*",
+    };
+    fs.writeFileSync(
+      "package.json",
+      JSON.stringify(existingPackageJson, null, 2)
+    );
+    console.log(colorize("✅ Updated package.json", "32"));
+
+    // Ensure publish.js is in node_modules/build-a-npm
+    const publishDir = path.join("node_modules", "build-a-npm");
+    fs.mkdirSync(publishDir, { recursive: true });
+    fs.copyFileSync(
+      path.join(__dirname, "publish.js"),
+      path.join(publishDir, "publish.js")
+    );
+    console.log(
+      colorize("✅ Ensured publish.js in node_modules/build-a-npm", "32")
+    );
+
+    // Generate .npmrc if needed and not present
+    if (
+      ["GitHub Packages", "Both"].includes(answers.publishTo) &&
+      !fs.existsSync(".npmrc")
+    ) {
+      const npmrcContent = generateNpmrc(
+        answers.githubUsername,
+        answers.githubToken
+      );
+      if (npmrcContent) {
+        fs.writeFileSync(".npmrc", npmrcContent);
+        console.log(colorize("✅ Generated .npmrc", "32"));
+      }
+    }
+
+    // Generate GitHub Actions workflow if needed
+    if (
+      ["GitHub Packages", "Both"].includes(answers.publishTo) &&
+      !fs.existsSync(".github/workflows/publish.yml")
+    ) {
+      const workflowDir = path.join(".github", "workflows");
+      fs.mkdirSync(workflowDir, { recursive: true });
+      const workflowContent = generateGitHubWorkflow(answers);
+      fs.writeFileSync(path.join(workflowDir, "publish.yml"), workflowContent);
+      console.log(colorize("✅ Generated .github/workflows/publish.yml", "32"));
+    }
+
+    // Update .gitignore if needed
+    if (!fs.existsSync(".gitignore")) {
+      const gitignoreContent = generateGitignore();
+      fs.writeFileSync(".gitignore", gitignoreContent);
+      console.log(colorize("✅ Generated .gitignore", "32"));
+    }
+
+    console.log("\n" + colorize("🎉 Package upgrade complete!", "1;36"));
+    console.log("\n" + colorize("📋 Next steps:", "1;36"));
+    console.log(colorize("1. Run `npm install` to update dependencies", "36"));
+    if (isWindows) {
+      console.log(
+        colorize(
+          "   - On Windows, run commands in an Administrator Command Prompt to avoid permissions errors",
+          "33"
+        )
+      );
+    }
+    console.log(
+      colorize(
+        `2. Verify your package.json and other files, then run \`npm run publish\` to publish`,
+        "36"
+      )
+    );
+  } catch (err) {
+    console.error(colorize("❌ Error:", "31"), err.message);
+    console.error(
+      colorize(
+        "💡 Check your file permissions, network connection, or try running the command again.",
+        "33"
+      )
+    );
+    process.exit(1);
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const noGit = args.includes("--no-git");
+  const useSample = args.includes("--sample");
+
   if (args.includes("init")) {
-    await init(noGit);
+    await init(noGit, useSample);
+  } else if (args.includes("upgrade")) {
+    await upgrade();
   } else {
-    console.log(colorize("Usage: npx build-a-npm init [--no-git]", "36"));
+    console.log(colorize("Usage: npx build-a-npm <command>", "36"));
+    console.log(
+      colorize("Available commands: init [--no-git] [--sample], upgrade", "36")
+    );
     console.log(
       colorize('Run "build-a-npm init" to create a new Node package.', "36")
     );
     console.log(
-      colorize("Use --no-git to skip git repository initialization.", "36")
+      colorize(
+        'Run "build-a-npm init --sample" to create a package with sample data.',
+        "36"
+      )
+    );
+    console.log(
+      colorize(
+        'Run "build-a-npm upgrade" to update an existing package with new features.',
+        "36"
+      )
+    );
+    console.log(
+      colorize(
+        "Use --no-git with init to skip git repository initialization.",
+        "36"
+      )
     );
     process.exit(1);
   }
@@ -949,9 +1018,10 @@ main().catch((err) => {
 
 module.exports = {
   init,
+  upgrade,
   promptPackageDetails,
+  generateSampleAnswers,
   generatePackageJson,
-  generatePublishScript,
   generateNpmrc,
   generateReadme,
   generateLicense,
