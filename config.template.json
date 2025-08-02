@@ -1,10 +1,10 @@
 {
-  "useNewDir": "Yes",
+  "useNewDir": "Yes, same as my Package Name",
   "projectDir": "my-package",
-  "useMonorepo": false,
+  "useMonorepo": "No",
   "publishTo": "Both",
   "access": "public",
-  "createGitHubWorkflow": true,
+  "createGitHubWorkflow": "Yes",
   "name": "my-package",
   "version": "0.0.1",
   "githubUsername": "your-username",
@@ -17,9 +17,9 @@
   "homepage": "https://github.com/your-username/my-package",
   "keywords": ["node", "package"],
   "license": "MIT",
-  "useTypeScript": false,
-  "useESLint": false,
-  "usePrettier": false,
+  "useTypeScript": "No",
+  "useESLint": "No",
+  "usePrettier": "No",
   "customScripts": {
     "lint": "eslint .",
     "test": "jest"
