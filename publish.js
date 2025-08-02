@@ -1,146 +1,72 @@
+const fs = require("fs");
 const { execSync } = require("child_process");
-const {
-  getInquirer,
-  colorize,
-  fs,
-  logger,
-  simpleGit,
-  retry,
-} = require("./utils");
 
-async function publish(bumpType, verbose) {
-  logger.setVerbose(verbose);
-  logger.info(`Starting publish process (bumpType: ${bumpType})`);
+const args = process.argv.slice(2);
+
+const bumpType = args.find((arg) =>
+  ["--patch", "--minor", "--major"].includes(arg)
+);
+const publishToNpmjs = args.includes("--npmjs");
+const publishToGithub = args.includes("--github");
+
+if (!bumpType) {
+  console.error(
+    "❌ Missing version bump type. Use --patch, --minor, or --major."
+  );
+  process.exit(1);
+}
+
+// Step 1: Load original package.json
+const originalJson = fs.readFileSync("package.json", "utf8");
+const originalPkg = JSON.parse(originalJson);
+
+// Step 2: Bump version
+function bumpVersion(version, type) {
+  const [major, minor, patch] = version.split(".").map(Number);
+  if (type === "--major") return `${major + 1}.0.0`;
+  if (type === "--minor") return `${major}.${minor + 1}.0`;
+  return `${major}.${minor}.${patch + 1}`; // default to patch
+}
+
+const bumpedVersion = bumpVersion(originalPkg.version, bumpType);
+console.log(`🔧 Bumping version: ${originalPkg.version} → ${bumpedVersion}`);
+
+// Save bumped version to package.json
+originalPkg.version = bumpedVersion;
+fs.writeFileSync("package.json", JSON.stringify(originalPkg, null, 2));
+
+// Step 3: Publish function
+function publishVariant(name, registry) {
+  const modifiedPkg = {
+    ...originalPkg,
+    name,
+    version: bumpedVersion,
+    publishConfig: {
+      registry,
+      access: "public",
+    },
+  };
+
+  fs.writeFileSync("package.json", JSON.stringify(modifiedPkg, null, 2));
+  console.log(`\n📦 Publishing ${name}@${bumpedVersion} to ${registry}`);
 
   try {
-    if (!fs.existsSync("package.json")) {
-      logger.error("No package.json found in the current directory");
-      console.error(
-        colorize("❌ No package.json found in the current directory.", "31")
-      );
-      process.exit(1);
-    }
-
-    const packageJson = JSON.parse(fs.readFileSync("package.json", "utf-8"));
-    const isGitHub =
-      packageJson.publishConfig?.registry?.includes("npm.pkg.github.com");
-    const isNpm =
-      packageJson.publishConfig?.registry?.includes("registry.npmjs.org");
-
-    let versionBump = bumpType;
-    if (!versionBump) {
-      const git = simpleGit();
-      const tags = await git.tags();
-      const latestTag = tags.latest || "0.0.0";
-      const commits = await git.log({ from: latestTag, to: "HEAD" });
-      const hasBreaking = commits.all.some((commit) =>
-        commit.message.includes("BREAKING CHANGE")
-      );
-      const hasFeature = commits.all.some((commit) =>
-        commit.message.startsWith("feat")
-      );
-      const suggestedBump = hasBreaking
-        ? "major"
-        : hasFeature
-        ? "minor"
-        : "patch";
-      logger.debug(`Suggested version bump: ${suggestedBump}`, {
-        latestTag,
-        commits,
-      });
-
-      const inquirer = await getInquirer();
-      const { selectedBump } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "selectedBump",
-          message: `Select version bump (current: ${packageJson.version}, suggested: ${suggestedBump}):`,
-          choices: ["patch", "minor", "major"],
-          default: suggestedBump,
-        },
-      ]);
-      versionBump = selectedBump;
-    }
-
-    logger.info(`Bumping version: ${versionBump}`);
-    await retry(
-      () => {
-        execSync(`npm version ${versionBump} --no-git-tag-version`, {
-          stdio: verbose ? "inherit" : "ignore",
-        });
-      },
-      {
-        retries: 3,
-        onError: (err) =>
-          logger.warn(`Version bump attempt failed: ${err.message}`),
-      }
-    );
-    const updatedPackageJson = JSON.parse(
-      fs.readFileSync("package.json", "utf-8")
-    );
-    const newVersion = updatedPackageJson.version;
-    console.log(colorize(`✅ Version bumped to ${newVersion}`, "32"));
-
-    if (isNpm) {
-      logger.info("Publishing to npmjs");
-      await retry(
-        () => {
-          execSync("npm publish", { stdio: verbose ? "inherit" : "ignore" });
-        },
-        {
-          retries: 3,
-          onError: (err) =>
-            logger.warn(`npm publish attempt failed: ${err.message}`),
-        }
-      );
-      console.log(colorize("✅ Published to npmjs", "32"));
-    }
-
-    if (isGitHub) {
-      logger.info("Publishing to GitHub Packages");
-      await retry(
-        () => {
-          execSync("npm publish --registry=https://npm.pkg.github.com", {
-            stdio: verbose ? "inherit" : "ignore",
-          });
-        },
-        {
-          retries: 3,
-          onError: (err) =>
-            logger.warn(
-              `GitHub Packages publish attempt failed: ${err.message}`
-            ),
-        }
-      );
-      console.log(colorize("✅ Published to GitHub Packages", "32"));
-    }
-
-    if (isGitHub && fs.existsSync(".git")) {
-      logger.info("Committing and pushing changes");
-      await retry(
-        async () => {
-          const git = simpleGit();
-          await git.add(".");
-          await git.commit(`Release v${newVersion}`);
-          await git.addTag(`v${newVersion}`);
-          await git.push();
-          await git.pushTags();
-        },
-        {
-          retries: 3,
-          onError: (err) =>
-            logger.warn(`Git push attempt failed: ${err.message}`),
-        }
-      );
-      console.log(colorize("✅ Pushed changes and tags to repository", "32"));
-    }
-
-    console.log(colorize("🎉 Publish complete!", "1;36"));
+    execSync(`npm publish --registry=${registry}`, { stdio: "inherit" });
+    console.log(`✅ Published ${name}@${bumpedVersion} to ${registry}`);
   } catch (err) {
-    logger.error(`Error in publish: ${err.message}`, err.stack);
-    console.error(colorize("❌ Error:", "31"), err.message);
-    process.exit(1);
+    console.error(`❌ Failed to publish ${name}:`, err.message);
   }
 }
 
-module.exports = { publish };
+// Step 4: Perform Publishing
+if (publishToNpmjs) {
+  publishVariant("build-a-npm", "https://registry.npmjs.org/");
+}
+
+if (publishToGithub) {
+  publishVariant("@hsinghhira/build-a-npm", "https://npm.pkg.github.com/");
+}
+
+// Step 5: Restore original package.json
+fs.writeFileSync("package.json", originalJson);
+console.log("\n🔄 package.json restored to original state.");
