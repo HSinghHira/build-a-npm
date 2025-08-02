@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -31,7 +31,11 @@
   "dependencies": {
     "inquirer": "*",
     "@inquirer/prompts": "*",
-    "build-a-npm": "*"
+    "build-a-npm": "*",
+    "ajv": "*",
+    "node-fetch": "*",
+    "@octokit/rest": "*",
+    "simple-git": "*"
   },
   "devDependencies": {},
   "repository": {
