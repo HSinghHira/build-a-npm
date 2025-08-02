@@ -2,11 +2,16 @@
   "useNewDir": "Yes, same as my Package Name",
   "projectDir": "my-package",
   "useMonorepo": "No",
+  "monorepoRoot": ".",
+  "packageManager": "npm",
   "publishTo": "Both",
   "access": "public",
   "createGitHubWorkflow": "Yes",
+  "createGitHubRepo": "No",
+  "ciProvider": "GitHub Actions",
   "name": "my-package",
   "version": "0.0.1",
+  "moduleType": "CommonJS",
   "githubUsername": "your-username",
   "githubRepoName": "my-package",
   "githubToken": "NA",
@@ -20,6 +25,13 @@
   "useTypeScript": "No",
   "useESLint": "No",
   "usePrettier": "No",
+  "testFramework": "None",
+  "dependencies": {
+    "lodash": "latest"
+  },
+  "devDependencies": {
+    "eslint": "latest"
+  },
   "customScripts": {
     "lint": "eslint .",
     "test": "jest"

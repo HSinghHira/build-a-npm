@@ -1,6 +1,6 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -22,10 +22,28 @@
     "do": "node publish.js --patch --github --npmjs && npm run github"
   },
   "dependencies": {
-    "inquirer": "*"
+    "inquirer": "*",
+    "@inquirer/prompts": "*",
+    "ajv": "*",
+    "node-fetch": "*",
+    "@octokit/rest": "*",
+    "simple-git": "*"
   },
   "devDependencies": {
-    "build-a-npm": "*"
+    "build-a-npm": "*",
+    "jest": "*",
+    "mocha": "*",
+    "vitest": "*",
+    "chai": "*",
+    "eslint": "*",
+    "prettier": "*",
+    "typescript": "*",
+    "@typescript-eslint/parser": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "ts-node": "*",
+    "@types/node": "*",
+    "@types/jest": "*",
+    "@types/chai": "*"
   },
   "repository": {
     "type": "git",
