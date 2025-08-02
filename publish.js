@@ -3,102 +3,80 @@ const { execSync } = require("child_process");
 
 const args = process.argv.slice(2);
 
-// ⛔ Prevent recursive execution
-if (process.env.SKIP_PUBLISH === "true") {
-  console.log("🛑 Skipping publish: recursive execution detected.");
-  process.exit(0);
-}
-
-// ⛔ Prevent loop if last commit was a version bump
-const lastCommitMessage = execSync("git log -1 --pretty=%B").toString().trim();
-if (/^Bump version to/.test(lastCommitMessage)) {
-  console.log("🛑 Skipping publish: last commit was a version bump.");
-  process.exit(0);
-}
-
-// 🧩 Parse flags
-const bumpType = args.find((arg) =>
+let bumpType = args.find((arg) =>
   ["--patch", "--minor", "--major"].includes(arg)
 );
-const publishToNpmjs = args.includes("--npmjs");
-const publishToGithub = args.includes("--github");
-const restoreOriginal = args.includes("--restore");
 
+// Default to patch if no bump type is specified
 if (!bumpType) {
-  console.error(
-    "❌ Missing version bump type. Use --patch, --minor, or --major."
-  );
-  process.exit(1);
+  bumpType = "--patch";
+  console.log("ℹ️  No version bump type specified, defaulting to --patch");
 }
 
-// 📦 Read and bump version
+const publishToNpmjs = args.includes("--npmjs");
+const publishToGithub = args.includes("--github");
+
+// Step 1: Load original package.json
 const originalJson = fs.readFileSync("package.json", "utf8");
 const originalPkg = JSON.parse(originalJson);
 
+// Step 2: Bump version
 function bumpVersion(version, type) {
   const [major, minor, patch] = version.split(".").map(Number);
   if (type === "--major") return `${major + 1}.0.0`;
   if (type === "--minor") return `${major}.${minor + 1}.0`;
-  return `${major}.${minor}.${patch + 1}`;
+  return `${major}.${minor}.${patch + 1}`; // default to patch
 }
 
-const newVersion = bumpVersion(originalPkg.version, bumpType);
-console.log(`🔧 Bumping version: ${originalPkg.version} → ${newVersion}`);
+const bumpedVersion = bumpVersion(originalPkg.version, bumpType);
+console.log(`🔧 Bumping version: ${originalPkg.version} → ${bumpedVersion}`);
 
-originalPkg.version = newVersion;
+// Save bumped version to package.json
+originalPkg.version = bumpedVersion;
 fs.writeFileSync("package.json", JSON.stringify(originalPkg, null, 2));
 
-// 🛠️ Publish function
+// Step 3: Publish function
 function publishVariant(name, registry) {
-  const pkg = {
+  const modifiedPkg = {
     ...originalPkg,
     name,
-    version: newVersion,
+    version: bumpedVersion,
     publishConfig: {
       registry,
       access: "public",
     },
+    // Remove scripts to prevent infinite loops
+    scripts: {},
   };
 
-  fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
-  console.log(`\n📦 Publishing ${name}@${newVersion} to ${registry}`);
+  fs.writeFileSync("package.json", JSON.stringify(modifiedPkg, null, 2));
+  console.log(`\n📦 Publishing ${name}@${bumpedVersion} to ${registry}`);
 
   try {
-    execSync(`npm publish --registry=${registry}`, {
-      stdio: "inherit",
-      env: { ...process.env, SKIP_PUBLISH: "true" },
-    });
-    console.log(`✅ Published ${name}@${newVersion} to ${registry}`);
+    execSync(`npm publish --registry=${registry}`, { stdio: "inherit" });
+    console.log(`✅ Published ${name}@${bumpedVersion} to ${registry}`);
   } catch (err) {
     console.error(`❌ Failed to publish ${name}:`, err.message);
   }
 }
 
-// 🚀 Run publishes
+// Step 4: Perform Publishing
 if (publishToNpmjs) {
   publishVariant("build-a-npm", "https://registry.npmjs.org/");
 }
+
 if (publishToGithub) {
   publishVariant("@hsinghhira/build-a-npm", "https://npm.pkg.github.com/");
 }
 
-// 📝 Auto-commit version bump (with skip ci)
-try {
-  execSync(`git config user.name "github-actions"`);
-  execSync(`git config user.email "actions@github.com"`);
-
-  execSync(`git add -A`);
-  execSync(`git commit -m "Bump version to ${newVersion} [skip ci]"`);
-  execSync(`git push`);
-  console.log(`📤 Committed and pushed version bump to ${newVersion}`);
-} catch (err) {
-  console.warn(`⚠️ Could not commit/push version bump: ${err.message}`);
-}
-
-// 🔁 Restore or keep bumped version
-if (restoreOriginal) {
-  fs.writeFileSync("package.json", originalJson);
-  console.log("\n🔄 package.json restored to original state.");
-} else {
-  console.log(`\n📁 package.json updated to bumped version: ${newVersion}`);
-}
+// Step 5: Restore original package.json but keep the bumped version
+const restoredPkg = {
+  ...originalPkg,
+  version: bumpedVersion, // Keep the new version
+};
+fs.writeFileSync("package.json", JSON.stringify(restoredPkg, null, 2));
+console.log(
+  `\n🔄 package.json restored to original state with version ${bumpedVersion}.`
+);
+console.log("✅ Publishing process completed successfully.");
+console.log("🚀 Ready for the next steps!");
