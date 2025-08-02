@@ -18,7 +18,7 @@ A powerful CLI tool to scaffold and publish Node.js packages with automatic vers
 Install the package globally or use it via `npx`:
 
 ```bash
-npm install -g build-a-npm
+npm i -g build-a-npm
 ```
 
 Or run directly with `npx`:
