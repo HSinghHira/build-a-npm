@@ -3,6 +3,12 @@ const { execSync } = require("child_process");
 
 const args = process.argv.slice(2);
 
+// ⛔ Prevent recursive execution
+if (process.env.SKIP_PUBLISH === "true") {
+  console.log("🛑 Skipping publish: recursive execution detected.");
+  process.exit(0);
+}
+
 // ⛔ Prevent loop if last commit was a version bump
 const lastCommitMessage = execSync("git log -1 --pretty=%B").toString().trim();
 if (/^Bump version to/.test(lastCommitMessage)) {
@@ -58,7 +64,10 @@ function publishVariant(name, registry) {
   console.log(`\n📦 Publishing ${name}@${newVersion} to ${registry}`);
 
   try {
-    execSync(`npm publish --registry=${registry}`, { stdio: "inherit" });
+    execSync(`npm publish --registry=${registry}`, {
+      stdio: "inherit",
+      env: { ...process.env, SKIP_PUBLISH: "true" },
+    });
     console.log(`✅ Published ${name}@${newVersion} to ${registry}`);
   } catch (err) {
     console.error(`❌ Failed to publish ${name}:`, err.message);
@@ -78,7 +87,7 @@ try {
   execSync(`git config user.name "github-actions"`);
   execSync(`git config user.email "actions@github.com"`);
 
-  execSync(`git add package.json`);
+  execSync(`git add -A`);
   execSync(`git commit -m "Bump version to ${newVersion} [skip ci]"`);
   execSync(`git push`);
   console.log(`📤 Committed and pushed version bump to ${newVersion}`);

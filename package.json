@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.3.25",
+  "version": "0.3.29",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -14,20 +14,19 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "github": "git add -A && git commit -m \"Building\" && git push",
+    "git": "git add -A && git commit -m 'Update' && git push",
     "publish": "npm run publish:patch",
-    "publish:patch": "npm run github && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
-    "publish:minor": "npm run github && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
-    "publish:major": "npm run github && node node_modules/build-a-npm/publish.js --major --github --npmjs",
-    "do": "node publish.js --patch --github --npmjs && npm run github"
+    "publish:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "publish:minor": "node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "publish:major": "node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "do": "npm run git && node publish.js --patch --github --npmjs"
   },
   "dependencies": {
     "inquirer": "*",
-    "@inquirer/prompts": "*"
-  },
-  "devDependencies": {
+    "@inquirer/prompts": "*",
     "build-a-npm": "*"
   },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hsinghhira/build-a-npm.git"
