@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.3.33",
+  "version": "0.4.0",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -19,6 +19,13 @@
     "publish:patch": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
     "publish:minor": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
     "publish:major": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "pub": "npm run publish:patch",
+    "pub:pat": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "pub:min": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "pub:maj": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "nogit:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "nogit:minor": "node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "nogit:major": "node node_modules/build-a-npm/publish.js --major --github --npmjs",
     "do": "npm run git && node publish.js --patch --github --npmjs"
   },
   "dependencies": {
