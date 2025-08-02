@@ -5,7 +5,7 @@
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
   },
-  "description": "A tool to create and publish Node packages with automatic version bumping",
+  "description": "A tool to create and publish Node packages with automatic version bumping and GitHub integration.",
   "main": "index.js",
   "bin": {
     "build-a-npm": "./index.js"
