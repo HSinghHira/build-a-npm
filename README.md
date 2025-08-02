@@ -182,3 +182,36 @@ Contributions are welcome! Please open an issue or submit a pull request on [Git
 ## License
 
 MIT
+
+```
+build-a-npm
+├─ config.template.json
+├─ index.js
+├─ lib
+│  ├─ generateCircleCIWorkflow.js
+│  ├─ generateEslintConfig.js
+│  ├─ generateGitHubWorkflow.js
+│  ├─ generateGitignore.js
+│  ├─ generateGitLabWorkflow.js
+│  ├─ generateIndexFile.js
+│  ├─ generateLicense.js
+│  ├─ generateNpmIgnore.js
+│  ├─ generateNpmrc.js
+│  ├─ generatePackageJson.js
+│  ├─ generatePrettierConfig.js
+│  ├─ generateReadme.js
+│  ├─ generateSampleAnswers.js
+│  ├─ generateTestFile.js
+│  ├─ generateTsConfig.js
+│  ├─ generateVitePress.js
+│  ├─ init.js
+│  ├─ logger.js
+│  ├─ promptPackageDetails.js
+│  ├─ upgrade.js
+│  └─ utils.js
+├─ LICENSE
+├─ package.json
+├─ publish.js
+└─ README.md
+
+```

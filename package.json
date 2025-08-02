@@ -1,6 +1,6 @@
 {
   "name": "@hsinghhira/build-a-npm",
-  "version": "0.3.16",
+  "version": "0.3.17",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -23,27 +23,10 @@
   },
   "dependencies": {
     "inquirer": "*",
-    "@inquirer/prompts": "*",
-    "ajv": "*",
-    "node-fetch": "*",
-    "@octokit/rest": "*",
-    "simple-git": "*"
+    "@inquirer/prompts": "*"
   },
   "devDependencies": {
-    "build-a-npm": "*",
-    "jest": "*",
-    "mocha": "*",
-    "vitest": "*",
-    "chai": "*",
-    "eslint": "*",
-    "prettier": "*",
-    "typescript": "*",
-    "@typescript-eslint/parser": "*",
-    "@typescript-eslint/eslint-plugin": "*",
-    "ts-node": "*",
-    "@types/node": "*",
-    "@types/jest": "*",
-    "@types/chai": "*"
+    "build-a-npm": "*"
   },
   "repository": {
     "type": "git",
