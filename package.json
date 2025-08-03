@@ -1,0 +1,69 @@
+{
+  "name": "build-a-npm",
+  "version": "0.4.8",
+  "author": {
+    "name": "Harman Singh Hira",
+    "url": "https://me.hsinghhira.me"
+  },
+  "description": "A tool to create and publish Node packages with automatic version bumping and GitHub integration.",
+  "main": "index.js",
+  "bin": {
+    "build-a-npm": "./index.js"
+  },
+  "homepage": "https://github.com/hsinghhira/build-a-npm",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "git": "git add -A && git commit -m 'Update' && git push",
+    "publish": "npm run publish:patch",
+    "publish:patch": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "publish:minor": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "publish:major": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "pub": "npm run publish:patch",
+    "pub:pat": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "pub:min": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "pub:maj": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "nogit:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
+    "nogit:minor": "node node_modules/build-a-npm/publish.js --minor --github --npmjs",
+    "nogit:major": "node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "do": "npm run git && node publish.js --patch --github --npmjs",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "inquirer": "*",
+    "@inquirer/prompts": "*",
+    "ajv": "*",
+    "node-fetch": "*",
+    "@octokit/rest": "*",
+    "simple-git": "*",
+    "marked": "*"
+  },
+  "devDependencies": {
+    "build-a-npm": "*",
+    "prettier": "*",
+    "marked": "latest"
+  },
+  "bugs": {
+    "url": "https://github.com/hsinghhira/build-a-npm/issues"
+  },
+  "keywords": [
+    "npm",
+    "package",
+    "scaffold",
+    "cli",
+    "generator",
+    "publish",
+    "github-packages",
+    "npmjs"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "index.js",
+    "publish.js",
+    "lib",
+    "config.template.json"
+  ]
+}

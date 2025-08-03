@@ -1,0 +1,10 @@
+node_modules/
+.gitignore
+.npmrc
+build-a-npm.log
+.build-a-npm-state.json
+test/
+*.md
+.github/
+.gitlab-ci.yml
+.circleci/
