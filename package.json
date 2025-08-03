@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.4.21",
+  "version": "0.4.22",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -16,7 +16,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "index": "node generateIndex.js",
     "console": "node node_modules/build-a-npm/lib/publishConsole.js",
-    "git": "npm run index && git add . && git commit -m \"chore: updates\" && git branch -M main && git remote add origin https://github.com/hsinghhira/build-a-npm.git && git push",
+    "git": "npm run index && git add . && git commit -m \"chore: updates\" && git branch -M main && (git remote get-url origin || git remote add origin https://github.com/hsinghhira/build-a-npm.git) && git push",
     "publish": "npm run publish:patch",
     "publish:patch": "node node_modules/build-a-npm/publish.js --patch --npmjs --github && npm run git && npm run console",
     "publish:minor": "node node_modules/build-a-npm/publish.js --minor --npmjs --github && npm run git && npm run console",
