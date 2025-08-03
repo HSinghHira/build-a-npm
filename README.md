@@ -1,4 +1,4 @@
-# 🛠️ build-a-npm
+# 🛠️ Build a Node.js Package
 
 **A simple CLI tool to create and publish Node.js packages easily.**
 
@@ -6,7 +6,7 @@
 
 ## 📦 What is this?
 
-`build-a-npm` helps you create a new NPM package with all important files (like `package.json`, `README.md`, `.gitignore`, `LICENSE`, etc.) in seconds.
+`build-a-npm` helps you create a new NPM package with all important files in seconds.
 
 It also lets you **publish your package** to:
 
