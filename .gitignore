@@ -16,3 +16,4 @@ pnpm-lock.yaml
 .gitignore
 package-lock.json
 tests
+.npmignore
