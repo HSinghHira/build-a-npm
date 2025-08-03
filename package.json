@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -14,20 +14,21 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "git": "git add -A && git commit -m 'Update' && git push",
-    "publish": "npm run publish:patch",
-    "publish:patch": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
-    "publish:minor": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
-    "publish:major": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
-    "pub": "npm run publish:patch",
-    "pub:pat": "npm run git && node node_modules/build-a-npm/publish.js --patch --github --npmjs",
-    "pub:min": "npm run git && node node_modules/build-a-npm/publish.js --minor --github --npmjs",
-    "pub:maj": "npm run git && node node_modules/build-a-npm/publish.js --major --github --npmjs",
-    "nogit:patch": "node node_modules/build-a-npm/publish.js --patch --github --npmjs",
-    "nogit:minor": "node node_modules/build-a-npm/publish.js --minor --github --npmjs",
-    "nogit:major": "node node_modules/build-a-npm/publish.js --major --github --npmjs",
+    "git": "git add . && git commit -m \"chore: updates\" && git push",
+    "publish": "node node_modules/build-a-npm/publish.js patch",
+    "publish:patch": "node node_modules/build-a-npm/publish.js patch",
+    "publish:minor": "node node_modules/build-a-npm/publish.js minor",
+    "publish:major": "node node_modules/build-a-npm/publish.js major",
+    "pub": "node node_modules/build-a-npm/publish.js patch",
+    "pub:pat": "node node_modules/build-a-npm/publish.js patch",
+    "pub:min": "node node_modules/build-a-npm/publish.js minor",
+    "pub:maj": "node node_modules/build-a-npm/publish.js major",
+    "nogit:patch": "node node_modules/build-a-npm/publish.js patch nogit",
+    "nogit:minor": "node node_modules/build-a-npm/publish.js minor nogit",
+    "nogit:major": "node node_modules/build-a-npm/publish.js major nogit",
     "do": "npm run git && node publish.js --patch --github --npmjs",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "index": "node generateIndex.js"
   },
   "dependencies": {
     "inquirer": "*",
@@ -58,12 +59,17 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://npm.pkg.github.com/"
   },
   "files": [
     "index.js",
     "publish.js",
     "lib",
     "config.template.json"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HSinghHira/build-a-npm.git"
+  },
+  "type": "commonjs"
 }
