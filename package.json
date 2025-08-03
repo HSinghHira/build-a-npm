@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -32,18 +32,20 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "inquirer": "*",
     "@inquirer/prompts": "*",
-    "ajv": "*",
-    "node-fetch": "*",
     "@octokit/rest": "*",
-    "simple-git": "*",
-    "marked": "*"
+    "ajv": "*",
+    "chalk": "^4.1.2",
+    "inquirer": "*",
+    "kleur": "^4.1.5",
+    "marked": "*",
+    "node-fetch": "*",
+    "simple-git": "*"
   },
   "devDependencies": {
     "build-a-npm": "*",
-    "prettier": "*",
-    "marked": "latest"
+    "marked": "latest",
+    "prettier": "*"
   },
   "bugs": {
     "url": "https://github.com/hsinghhira/build-a-npm/issues"
