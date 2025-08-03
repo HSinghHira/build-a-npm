@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0 auto;
+      max-width: 800px;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #333;
+    }
+    code {
+      background-color: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    pre {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛠️ Build a Node.js Package</h1>
+<p><strong>A simple CLI tool to create and publish Node.js packages easily.</strong></p>
+<hr>
+<h2>📦 What is this?</h2>
+<p><code>build-a-npm</code> helps you create a new NPM package with all important files in seconds.</p>
+<p>It also lets you <strong>publish your package</strong> to:</p>
+<ul>
+<li><a href="https://npmjs.com">npmjs.com</a></li>
+<li>GitHub Packages</li>
+</ul>
+<p>With <strong>automatic version bumping</strong> (patch, minor, or major)!</p>
+<hr>
+<h2>✨ Features</h2>
+<ul>
+<li>📦 Easy and guided package setup</li>
+<li>🛠️ Auto-create files:<code>index.js</code>,<code>.gitignore</code>,<code>README.md</code>, etc.</li>
+<li>🔄 Auto bump version (patch, minor, major)</li>
+<li>🚀 Publish to npm or GitHub with one command</li>
+<li>🤖 GitHub Actions &amp; GitLab CI support</li>
+<li>♻️ Update existing packages with<code>upgrade</code> command</li>
+<li>🌐 Works on Windows, macOS, and Linux</li>
+</ul>
+<hr>
+<h2>📥 Installation</h2>
+<h3>Option 1: Install globally</h3>
+<pre><code class="language-bash">npm install -g build-a-npm
+</code></pre>
+<h3>Option 2: Use with npx (no install needed)</h3>
+<pre><code>npx build-a-npm init
+</code></pre>
+<hr>
+<h2>🚀 Usage</h2>
+<h3>🧱 Create a New Package</h3>
+<pre><code>npx build-a-npm init
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Ask for package details</li>
+<li>Create important files</li>
+<li>Set up GitHub workflows (optional)</li>
+<li>Init a Git repo (optional)</li>
+</ul>
+<h4>Optional flags:</h4>
+<ul>
+<li><code>--no-git</code>: skip Git initialization</li>
+<li><code>--sample</code>: use default answers</li>
+<li><code>--verbose</code>: show full logs</li>
+</ul>
+<p>Example:</p>
+<pre><code>npx build-a-npm init --sample --no-git
+</code></pre>
+<h3>🔁 Upgrade an Existing Package</h3>
+<pre><code>npx build-a-npm upgrade
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Update old setup</li>
+<li>Add missing config files</li>
+<li>Keep your custom code safe</li>
+</ul>
+<hr>
+<h2>⚙️ Scripts in package.json</h2>
+<p>These scripts help with publishing:</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm run publish</code></td>
+<td>Bumps patch version and publishes</td>
+</tr>
+<tr>
+<td><code>npm run publish:patch</code></td>
+<td>Patch bump (x.y.z → x.y.z+1)</td>
+</tr>
+<tr>
+<td><code>npm run publish:minor</code></td>
+<td>Minor bump (x.y.z → x.y+1.0)</td>
+</tr>
+<tr>
+<td><code>npm run publish:major</code></td>
+<td>Major bump (x.y.z → x+1.0.0)</td>
+</tr>
+<tr>
+<td><code>npm run github</code></td>
+<td>Git commit &amp; push to GitHub</td>
+</tr>
+</tbody></table>
+<p>Example:</p>
+<pre><code>npm run publish:minor
+</code></pre>
+<hr>
+<h2>🧾 Files It Generates</h2>
+<ul>
+<li><code>package.json</code> – With scripts and meta infomation</li>
+<li><code>index.js</code> – Main code entry</li>
+<li><code>README.md</code> – Starter guide</li>
+<li><code>LICENSE</code> – MIT, ISC, GPL, etc.</li>
+<li><code>.gitignore</code> – For node projects</li>
+<li><code>.npmrc</code> – To publish to GitHub Packages <em>(only if GitHub publish is enabled)</em></li>
+<li><code>.github/workflows/publish.yml</code> – GitHub Actions CI/CD <em>(if enabled)</em></li>
+<li><code>.prettierrc</code>,<code>.eslintrc.json</code> – Config files <em>(if enabled)</em></li>
+<li><code>test.js</code>,<code>tsconfig.json</code> – Optional extras <em>(if enabled)</em></li>
+</ul>
+<hr>
+<h2>🤝 Contributing</h2>
+<p>Feel free to open issues or submit PRs:</p>
+<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
+<hr>
+<h2>📄 License</h2>
+<p>This project is licensed under the <a href="">MIT License</a></p>
+<hr>
+<h2>📤 Publishing</h2>
+<p>The script <code>publish.js</code> handles:</p>
+<ol>
+<li>Reading<code>package.json</code></li>
+<li>Bumping version</li>
+<li>Publishing to registries</li>
+<li>Restoring original file</li>
+<li>Committing and pushing to Git (if GitHub enabled)</li>
+</ol>
+<p>If using GitHub Actions, your workflow (<code>publish.yml</code>) will auto-run when changes are pushed.</p>
+<hr>
+<h2>🔐 Setup GitHub Packages (optional)</h2>
+<p>To publish to GitHub:</p>
+<ol>
+<li>Use a GitHub token (with<code>write:packages</code> scope)</li>
+<li>Save it in<code>.npmrc</code> or GitHub Secrets:<ul>
+<li><code>NPM_TOKEN</code></li>
+<li><code>GITHUB_TOKEN</code></li>
+</ul>
+</li>
+<li>Make sure your GitHub repo exists and is linked</li>
+</ol>
+<hr>
+<h2>📦 Setup npmjs.org</h2>
+<p>To publish to npm:</p>
+<ol>
+<li>Run<code>npm login</code></li>
+<li>Save your<code>NPM_TOKEN</code> in GitHub Secrets (for CI/CD)</li>
+<li>Run:</li>
+</ol>
+<pre><code>npm run publish
+</code></pre>
+<hr>
+<h2>🔧 Example Workflow</h2>
+<pre><code># 1. Create a new package
+npx build-a-npm init
+
+# 2. Add your code in index.js
+
+# 3. Install any needed dependencies
+npm install
+
+# 4. Publish your first version
+npm run publish
+
+# 5. Next time, bump version like this:
+npm run publish:minor
+</code></pre>
+<hr>
+<h2>🛠️ Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Permission Error</td>
+<td>Run terminal as Admin or use sudo</td>
+</tr>
+<tr>
+<td>GitHub Token Issue</td>
+<td>Check token scope and<code>.npmrc</code></td>
+</tr>
+<tr>
+<td>Publish Fails</td>
+<td>Check internet and auth settings</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>🤝 Contributing</h2>
+<p>Feel free to open issues or submit PRs:</p>
+<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
+<hr>
+<h2>📄 License</h2>
+<p>This project is licensed under the <a href="">MIT License</a></p>
+
+</body>
+</html>
