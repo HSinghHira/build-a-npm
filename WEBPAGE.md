@@ -37,12 +37,6 @@ With **automatic version bumping** (patch, minor, or major)!
 npm install -g build-a-npm
 ```
 
-### Option 2: Use with npx (no install needed)
-
-```
-npx build-a-npm init
-```
-
 ---
 
 ## 🚀 Usage
@@ -113,6 +107,7 @@ npm run publish:minor
 - `README.md` – Starter guide
 - `LICENSE` – MIT, ISC, GPL, etc.
 - `.gitignore` – For node projects
+- `WEBPAGE.md` – To create a Documentation and deploy on Github Pages
 - `.npmrc` – To publish to GitHub Packages _(only if GitHub publish is enabled)_
 - `.github/workflows/publish.yml` – GitHub Actions CI/CD _(if enabled)_
 - `.prettierrc`,`.eslintrc.json` – Config files _(if enabled)_

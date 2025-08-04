@@ -697,9 +697,6 @@
 <h3>Option 1: Install globally</h3>
 <pre><code class="language-bash">npm install -g build-a-npm
 </code></pre>
-<h3>Option 2: Use with npx (no install needed)</h3>
-<pre><code>npx build-a-npm init
-</code></pre>
 <hr>
 <h2>🚀 Usage</h2>
 <h3>🧱 Create a New Package</h3>
@@ -772,6 +769,7 @@
 <li><code>README.md</code> – Starter guide</li>
 <li><code>LICENSE</code> – MIT, ISC, GPL, etc.</li>
 <li><code>.gitignore</code> – For node projects</li>
+<li><code>WEBPAGE.md</code> – To create a Documentation and deploy on Github Pages</li>
 <li><code>.npmrc</code> – To publish to GitHub Packages <em>(only if GitHub publish is enabled)</em></li>
 <li><code>.github/workflows/publish.yml</code> – GitHub Actions CI/CD <em>(if enabled)</em></li>
 <li><code>.prettierrc</code>,<code>.eslintrc.json</code> – Config files <em>(if enabled)</em></li>
@@ -934,7 +932,7 @@ npm run publish:minor
 
     // Generate table of contents from headers
     function generateTOC() {
-      const headers = document.querySelectorAll('main h1');
+      const headers = document.querySelectorAll('main h2');
       const tocList = document.getElementById('tocList');
       
       headers.forEach((header, index) => {
