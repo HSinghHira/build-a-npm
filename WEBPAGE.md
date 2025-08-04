@@ -317,6 +317,6 @@ We welcome contributions! To get involved:
 
 Feel free to contact me related to anything:
 
-## 👉 [Contact me](https://me.hsinghhira.me/contact/)
+👉 [Contact me](https://me.hsinghhira.me/contact/)
 
 ---
