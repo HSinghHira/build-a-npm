@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "index": "node generateIndex.js",
+    "index": "node node_modules/build-a-npm/lib/generateIndex.js",
     "console": "node node_modules/build-a-npm/lib/publishConsole.js",
     "git": "npm run index && git add . && git commit -m \"chore: updates\" && git branch -M main && (git remote get-url origin || git remote add origin https://github.com/hsinghhira/build-a-npm.git) && git push",
     "publish": "npm run publish:patch",
@@ -44,7 +44,8 @@
   },
   "devDependencies": {
     "marked": "latest",
-    "prettier": "*"
+    "prettier": "*",
+    "build-a-npm": "*"
   },
   "bugs": {
     "url": "https://github.com/hsinghhira/build-a-npm/issues"

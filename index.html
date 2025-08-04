@@ -1,10 +1,38 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>build-a-npm Documentation</title>
+  <meta name="description" content="A tool to create and publish Node packages with automatic version bumping and GitHub integration.">
+  <meta name="keywords" content="A, tool, to, create, and, publish, Node, packages, with, automatic, MIT, documentation">
+  <meta name="author" content="Harman Singh Hira">
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="build-a-npm Documentation">
+  <meta property="og:description" content="A tool to create and publish Node packages with automatic version bumping and GitHub integration.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/hsinghhira/build-a-npm.git">
+  <meta property="og:site_name" content="build-a-npm Documentation">
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="build-a-npm Documentation">
+  <meta name="twitter:description" content="A tool to create and publish Node packages with automatic version bumping and GitHub integration.">
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": "build-a-npm Documentation",
+      "description": "A tool to create and publish Node packages with automatic version bumping and GitHub integration.",
+      "author": {
+        "@type": "Person",
+        "name": "Harman Singh Hira"
+      },
+      "license": "https://spdx.org/licenses/MIT.html",
+      "codeRepository": "git+https://github.com/hsinghhira/build-a-npm.git",
+      "programmingLanguage": "JavaScript"
+    }
+  </script>
   <style>
     :root {
       --bg-light: #ffffff;
@@ -106,7 +134,6 @@
       opacity: 0.9;
     }
 
-    /* Menu Toggle Button */
     .menu-toggle {
       position: fixed;
       top: 1.5rem;
@@ -187,7 +214,6 @@
       transform: rotate(-135deg);
     }
 
-    /* Navigation Styles */
     nav {
       width: 320px;
       padding: 0;
@@ -219,7 +245,6 @@
       letter-spacing: 0.8px;
     }
 
-    /* Mobile close button inside nav */
     .nav-close {
       display: none;
       position: absolute;
@@ -357,7 +382,6 @@
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
-    /* Main Content Styles */
     .container {
       display: flex;
       min-height: calc(100vh - 180px);
@@ -447,7 +471,6 @@
       color: var(--text);
     }
 
-    /* Table Styles */
     .table-container {
       overflow-x: auto;
       margin: 2rem 0;
@@ -482,7 +505,6 @@
       background: var(--table-stripe);
     }
 
-    /* Links */
     a {
       color: var(--accent);
       text-decoration: none;
@@ -494,7 +516,6 @@
       text-decoration: none;
     }
 
-    /* Lists */
     ul,
     ol {
       padding-left: 1.5rem;
@@ -504,7 +525,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Badge Styles */
     .badge {
       display: inline-block;
       background: var(--accent);
@@ -516,7 +536,6 @@
       margin: 0 0.25rem;
     }
 
-    /* Footer Styles */
     footer {
       text-align: center;
       padding: 2rem;
@@ -528,7 +547,6 @@
       background: var(--nav-bg);
     }
 
-    /* Responsive Design */
     @media (max-width: 768px) {
       .header h1 {
         font-size: 2rem;
@@ -551,7 +569,6 @@
         box-shadow: 4px 0 25px rgba(0, 0, 0, 0.25);
         height: 100%;
         overflow-y: auto;
-
       }
 
       nav.show {
@@ -589,7 +606,6 @@
       }
     }
 
-    /* Animations */
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -606,7 +622,6 @@
       animation: fadeInUp 0.6s ease-out;
     }
 
-    /* Overlay for mobile */
     .overlay {
       position: fixed;
       top: 0;
@@ -627,12 +642,8 @@
     }
   </style>
 </head>
-
 <body>
-  <!-- Mobile Overlay -->
   <div class="overlay" id="overlay"></div>
-
-  <!-- Menu Toggle Button -->
   <button class="menu-toggle" id="menuToggle" onclick="toggleNav()">
     <div class="hamburger">
       <span></span>
@@ -640,19 +651,15 @@
       <span></span>
     </div>
   </button>
-
   <div class="header">
     <div class="header-content">
       <h1>📦 build-a-npm Documentation</h1>
-      <p>Generated from README.md</p>
+      <p>A tool to create and publish Node packages with automatic version bumping and GitHub integration.</p>
     </div>
   </div>
-
   <div class="container">
     <nav id="toc">
       <div class="nav-header">
-
-
         <button class="theme-toggle" onclick="toggleTheme()">
           <span id="themeIcon">🌙</span>
           <span id="themeText">Dark Mode</span>
@@ -671,167 +678,294 @@
       </div>
     </button>
     <main>
-      <h1>🛠️ Build a Node.js Package</h1>
-<p><strong>A simple CLI tool to create and publish Node.js packages easily.</strong></p>
+      <p><strong><code>build-a-npm</code></strong> is a robust and user-friendly CLI tool designed to simplify the creation, management, and publishing of Node.js packages. With an interactive setup, automatic version bumping, and seamless integration with npmjs.com and GitHub Packages, it’s the perfect companion for developers looking to streamline their package development workflow. 🌟</p>
 <hr>
-<h2>📦 What is this?</h2>
-<p><code>build-a-npm</code> helps you create a new NPM package with all important files in seconds.</p>
-<p>It also lets you <strong>publish your package</strong> to:</p>
-<ul>
-<li><a href="https://npmjs.com">npmjs.com</a></li>
-<li>GitHub Packages</li>
-</ul>
-<p>With <strong>automatic version bumping</strong> (patch, minor, or major)!</p>
+<h2>🌟 Overview</h2>
+<p><code>build-a-npm</code> is an open-source CLI tool that empowers developers to scaffold, manage, and publish Node.js packages effortlessly. It offers an interactive setup process, generates a modern project structure, and supports advanced features like automated version bumping, GitHub Actions for CI/CD, and TypeScript integration. Whether you’re a beginner creating your first package or an experienced developer maintaining a monorepo, <code>build-a-npm</code> ensures a smooth and efficient workflow across Windows, macOS, and Linux. 🚀</p>
 <hr>
 <h2>✨ Features</h2>
 <ul>
-<li>📦 Easy and guided package setup</li>
-<li>🛠️ Auto-create files:<code>index.js</code>,<code>.gitignore</code>,<code>README.md</code>, etc.</li>
-<li>🔄 Auto bump version (patch, minor, major)</li>
-<li>🚀 Publish to npm or GitHub with one command</li>
-<li>🤖 GitHub Actions &amp; GitLab CI support</li>
-<li>♻️ Update existing packages with<code>upgrade</code> command</li>
-<li>🌐 Works on Windows, macOS, and Linux</li>
+<li><strong>🧠 Interactive Setup</strong>: Guided prompts for package details, including name, version, author, license, and more.</li>
+<li><strong>🔢 Automatic Version Bumping</strong>: Supports <code>patch</code>, <code>minor</code>, and <code>major</code> version increments with automated <code>package.json</code> updates.</li>
+<li><strong>🌐 Dual Publishing</strong>: Publish to npmjs.com, GitHub Packages, or both with a single command.</li>
+<li><strong>🤖 GitHub Actions Integration</strong>: Generates workflows for automated publishing and documentation deployment.</li>
+<li><strong>📂 Git Integration</strong>: Initializes a git repository and includes scripts for committing and pushing changes.</li>
+<li><strong>📘 TypeScript Support</strong>: Optional TypeScript setup for modern JavaScript development.</li>
+<li><strong>📁 Comprehensive File Generation</strong>: Creates essential files like <code>package.json</code>, <code>index.js</code>, <code>README.md</code>, <code>.gitignore</code>, <code>.npmignore</code>, and more.</li>
+<li><strong>🔄 Package Upgrades</strong>: Updates existing packages to leverage the latest <code>build-a-npm</code> features without affecting custom code.</li>
+<li><strong>🌍 Cross-Platform</strong>: Works seamlessly on Windows, macOS, and Linux.</li>
+<li><strong>📜 GitHub Pages Support</strong>: Generates documentation and publishes it to GitHub Pages.</li>
+<li><strong>🔧 CI/CD Support</strong>: Templates for GitHub Actions, CircleCI, and GitLab CI.</li>
 </ul>
 <hr>
-<h2>📥 Installation</h2>
-<h3>Option 1: Install globally</h3>
+<h2>📦 Installation</h2>
+<h3>Option 1: Install Globally</h3>
 <pre><code class="language-bash">npm install -g build-a-npm
 </code></pre>
+<p>Run <code>build-a-npm</code> commands directly from your terminal. 🌐</p>
+<h3>Option 2: Use via npx</h3>
+<pre><code class="language-bash">npx build-a-npm &lt;command&gt;
+</code></pre>
+<p>Execute the latest version without global installation. 🚀</p>
 <hr>
 <h2>🚀 Usage</h2>
-<h3>🧱 Create a New Package</h3>
-<pre><code>npx build-a-npm init
+<p><code>build-a-npm</code> offers two primary commands: <code>init</code> and <code>upgrade</code>, along with a robust publishing workflow and documentation support.</p>
+<h3>🛠️ Creating a New Package</h3>
+<p>The <code>init</code> command scaffolds a new Node.js package with a guided setup process.</p>
+<pre><code class="language-bash">npx build-a-npm init
 </code></pre>
-<p>This will:</p>
+<h4>What It Does:</h4>
 <ul>
-<li>Ask for package details</li>
-<li>Create important files</li>
-<li>Set up GitHub workflows (optional)</li>
-<li>Init a Git repo (optional)</li>
+<li>📝 Prompts for package details, including:<ul>
+<li><strong>Directory</strong>: Create a new directory (same as package name, custom, or none).</li>
+<li><strong>Monorepo Support</strong>: Configure for monorepo setups with <code>npm</code>, <code>pnpm</code>, or <code>yarn</code>.</li>
+<li><strong>Publishing</strong>: Choose npmjs.com, GitHub Packages, or both.</li>
+<li><strong>Access Level</strong>: Public or private package.</li>
+<li><strong>GitHub Workflow</strong>: Optional GitHub Actions setup for CI/CD.</li>
+<li><strong>GitHub Repository</strong>: Auto-create a GitHub repository.</li>
+<li><strong>GitHub Pages</strong>: Enable documentation publishing.</li>
+<li><strong>CI/CD Provider</strong>: GitHub Actions, GitLab CI, CircleCI, or none.</li>
+<li><strong>Package Details</strong>: Name, version, description, author, license, keywords, etc.</li>
+<li><strong>TypeScript/ESLint/Prettier</strong>: Optional configurations for modern development.</li>
+<li><strong>Dependencies</strong>: Add dependencies and devDependencies with version control.</li>
+<li><strong>Custom Scripts</strong>: Add custom <code>package.json</code> scripts.</li>
 </ul>
-<h4>Optional flags:</h4>
+</li>
+<li>📂 Creates a project directory (if specified).</li>
+<li>📁 Generates essential files (see <a href="#generated-files">Generated Files</a>).</li>
+<li>🔗 Initializes a git repository (unless <code>--no-git</code> is used).</li>
+<li>🤖 Sets up CI/CD workflows (if enabled).</li>
+</ul>
+<h4>Optional Flags:</h4>
 <ul>
-<li><code>--no-git</code>: skip Git initialization</li>
-<li><code>--sample</code>: use default answers</li>
-<li><code>--verbose</code>: show full logs</li>
+<li><code>--no-git</code>: Skip git repository initialization.</li>
+<li><code>--sample</code>: Use predefined sample data to skip prompts.</li>
+<li><code>--verbose</code>: Display detailed logs.</li>
 </ul>
-<p>Example:</p>
-<pre><code>npx build-a-npm init --sample --no-git
+<h4>Example:</h4>
+<pre><code class="language-bash">npx build-a-npm init --sample --no-git
 </code></pre>
-<h3>🔁 Upgrade an Existing Package</h3>
-<pre><code>npx build-a-npm upgrade
+<h3>🔄 Upgrading an Existing Package</h3>
+<p>The <code>upgrade</code> command enhances existing packages with the latest <code>build-a-npm</code> features.</p>
+<pre><code class="language-bash">npx build-a-npm upgrade
 </code></pre>
-<p>This will:</p>
+<h4>What It Does:</h4>
 <ul>
-<li>Update old setup</li>
-<li>Add missing config files</li>
-<li>Keep your custom code safe</li>
+<li>✅ Verifies <code>package.json</code> and <code>build-a-npm</code> in <code>devDependencies</code>.</li>
+<li>🔄 Updates <code>package.json</code> scripts and dependencies.</li>
+<li>📁 Adds missing files (e.g., <code>.npmrc</code>, <code>.gitignore</code>, <code>.npmignore</code>, CI/CD workflows).</li>
+<li>🛡️ Preserves existing code and configurations.</li>
 </ul>
-<hr>
-<h2>⚙️ Scripts in package.json</h2>
-<p>These scripts help with publishing:</p>
+<h3>📤 Publishing a Package</h3>
+<p>The <code>publish.js</code> script manages version bumping and publishing to registries. The generated <code>package.json</code> includes scripts for various publishing scenarios:</p>
 <table>
 <thead>
 <tr>
 <th>Script</th>
-<th>What it does</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><code>npm run publish</code></td>
-<td>Bumps patch version and publishes</td>
+<td>Alias for <code>publish:patch</code>.</td>
 </tr>
 <tr>
 <td><code>npm run publish:patch</code></td>
-<td>Patch bump (x.y.z → x.y.z+1)</td>
+<td>Patch version bump (<code>0.0.1</code> → <code>0.0.2</code>) and Publish</td>
 </tr>
 <tr>
 <td><code>npm run publish:minor</code></td>
-<td>Minor bump (x.y.z → x.y+1.0)</td>
+<td>Minor version bump (<code>0.1.0</code> → <code>0.2.0</code>) and Publish</td>
 </tr>
 <tr>
 <td><code>npm run publish:major</code></td>
-<td>Major bump (x.y.z → x+1.0.0)</td>
+<td>Major version bump (<code>1.0.0</code> → <code>2.0.0</code>) and Publish</td>
 </tr>
 <tr>
-<td><code>npm run github</code></td>
-<td>Git commit &amp; push to GitHub</td>
+<td><code>npm run pub</code></td>
+<td>Alias for <code>publish:patch</code>.</td>
+</tr>
+<tr>
+<td><code>npm run pub:pat</code></td>
+<td>Alias for <code>publish:patch</code>.</td>
+</tr>
+<tr>
+<td><code>npm run pub:min</code></td>
+<td>Alias for <code>publish:minor</code>.</td>
+</tr>
+<tr>
+<td><code>npm run pub:maj</code></td>
+<td>Alias for <code>publish:major</code>.</td>
+</tr>
+<tr>
+<td><code>npm run nogit:patch</code></td>
+<td>Patch bump and publish without git operations.</td>
+</tr>
+<tr>
+<td><code>npm run nogit:minor</code></td>
+<td>Minor bump and publish without git operations.</td>
+</tr>
+<tr>
+<td><code>npm run nogit:major</code></td>
+<td>Major bump and publish without git operations.</td>
+</tr>
+<tr>
+<td><code>npm run do</code></td>
+<td>Runs <code>git</code>, then <code>publish:patch</code>.</td>
+</tr>
+<tr>
+<td><code>npm run git</code></td>
+<td>Generates <code>index.html</code>, commits, and pushes to GitHub.</td>
+</tr>
+<tr>
+<td><code>npm run index</code></td>
+<td>Generates <code>index.html</code> for GitHub Pages.</td>
+</tr>
+<tr>
+<td><code>npm run format</code></td>
+<td>Formats code with Prettier.</td>
 </tr>
 </tbody></table>
-<p>Example:</p>
-<pre><code>npm run publish:minor
+<h4>Example:</h4>
+<pre><code class="language-bash">npm run publish:minor
 </code></pre>
-<hr>
-<h2>🧾 Files It Generates</h2>
+<p>This will:</p>
 <ul>
-<li><code>package.json</code> – With scripts and meta infomation</li>
-<li><code>index.js</code> – Main code entry</li>
-<li><code>README.md</code> – Starter guide</li>
-<li><code>LICENSE</code> – MIT, ISC, GPL, etc.</li>
-<li><code>.gitignore</code> – For node projects</li>
-<li><code>WEBPAGE.md</code> – To create a Documentation and deploy on Github Pages</li>
-<li><code>.npmrc</code> – To publish to GitHub Packages <em>(only if GitHub publish is enabled)</em></li>
-<li><code>.github/workflows/publish.yml</code> – GitHub Actions CI/CD <em>(if enabled)</em></li>
-<li><code>.prettierrc</code>,<code>.eslintrc.json</code> – Config files <em>(if enabled)</em></li>
-<li><code>test.js</code>,<code>tsconfig.json</code> – Optional extras <em>(if enabled)</em></li>
+<li>🔢 Bump the minor version in <code>package.json</code>.</li>
+<li>📤 Publish to npmjs.com and/or GitHub Packages.</li>
+<li>🔄 Restore <code>package.json</code> (keeping the bumped version).</li>
+<li>📜 Commit and push changes to git (if enabled).</li>
+<li>📊 Log publishing details via <code>publishConsole.js</code>.</li>
 </ul>
-<hr>
-<h2>🤝 Contributing</h2>
-<p>Feel free to open issues or submit PRs:</p>
-<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
-<hr>
-<h2>📄 License</h2>
-<p>This project is licensed under the <a href="">MIT License</a></p>
-<hr>
-<h2>📤 Publishing</h2>
-<p>The script <code>publish.js</code> handles:</p>
+<h3>📜 Publishing the Documentation</h3>
+<p>If GitHub Pages is enabled during <code>init</code>, <code>build-a-npm</code> generates a <code>WEBPAGE.md</code> file to create an <code>index.html</code> file for documentation.</p>
+<h4>Steps:</h4>
 <ol>
-<li>Reading<code>package.json</code></li>
-<li>Bumping version</li>
-<li>Publishing to registries</li>
-<li>Restoring original file</li>
-<li>Committing and pushing to Git (if GitHub enabled)</li>
-</ol>
-<p>If using GitHub Actions, your workflow (<code>publish.yml</code>) will auto-run when changes are pushed.</p>
-<hr>
-<h2>🔐 Setup GitHub Packages (optional)</h2>
-<p>To publish to GitHub:</p>
-<ol>
-<li>Use a GitHub token (with<code>write:packages</code> scope)</li>
-<li>Save it in<code>.npmrc</code> or GitHub Secrets:<ul>
-<li><code>NPM_TOKEN</code></li>
-<li><code>GITHUB_TOKEN</code></li>
+<li><p><strong>Enable GitHub Pages</strong>:</p>
+<ul>
+<li>During <code>init</code>, select <code>Yes</code> for &quot;Publish a Documentation on GitHub Pages?&quot;.</li>
+<li>Provide a GitHub fine-grained Personal Access Token with <code>pages:write</code> scope.</li>
 </ul>
 </li>
-<li>Make sure your GitHub repo exists and is linked</li>
+<li><p><strong>Generate Documentation</strong>:</p>
+<pre><code class="language-bash">npm run index
+</code></pre>
+<p>This runs <code>generateIndex.js</code> to create <code>index.html</code> from your <code>README.md</code>.</p>
+</li>
+<li><p><strong>Publish to GitHub Pages</strong>:</p>
+<ul>
+<li>The <code>.github/workflows/publish.yml</code> workflow (if enabled) automatically deploys <code>index.html</code> to GitHub Pages on pushes to the <code>main</code> branch.</li>
+<li>Alternatively, manually commit and push <code>index.html</code> to the <code>gh-pages</code> branch.</li>
+</ul>
+</li>
+</ol>
+<h4>Requirements:</h4>
+<ul>
+<li>A GitHub repository with Pages enabled.</li>
+<li>A fine-grained token with <code>pages:write</code> scope, added to <code>.npmrc</code> or GitHub Secrets (<code>GITHUB_PAGES_TOKEN</code>).</li>
+</ul>
+<hr>
+<h2>📁 Generated Files</h2>
+<p><code>build-a-npm</code> creates a comprehensive set of files to ensure a modern and functional package:</p>
+<ul>
+<li><strong>📝 <code>package.json</code></strong>: Defines metadata, scripts, dependencies, and publishing configuration.</li>
+<li><strong>🛠️ <code>index.js</code></strong>: Main entry point with a sample implementation.</li>
+<li><strong>📜 <code>README.md</code></strong>: Starter documentation with usage instructions.</li>
+<li><strong>📄 <code>LICENSE</code></strong>: License file (MIT, ISC, Apache-2.0, GPL-3.0, or Unlicense).</li>
+<li><strong>🙈 <code>.gitignore</code></strong>: Ignores common Node.js files (e.g., <code>node_modules</code>).</li>
+<li><strong>🙈 <code>.npmignore</code></strong>: Specifies files to exclude from npm publishing.</li>
+<li><strong>🔐 <code>.npmrc</code></strong>: Configures GitHub Packages authentication (if enabled).</li>
+<li><strong>🤖 <code>.github/workflows/publish.yml</code></strong>: GitHub Actions workflow for CI/CD (if enabled).</li>
+<li><strong>📄 <code>generateIndex.js</code></strong>: Script to generate <code>index.html</code> for GitHub Pages (if enabled).</li>
+<li><strong>🔧 <code>.prettierrc</code></strong>: Prettier configuration for code formatting (if enabled).</li>
+<li><strong>🔍 <code>.eslintrc.json</code></strong>: ESLint configuration for linting (if enabled).</li>
+<li><strong>🧪 <code>test.js</code></strong>: Sample test file (if a testing framework is selected).</li>
+<li><strong>⚙️ <code>tsconfig.json</code></strong>: TypeScript configuration (if TypeScript is enabled).</li>
+</ul>
+<hr>
+<h2>⚙️ Configuration</h2>
+<h3>🌐 npmjs.com Setup</h3>
+<ol>
+<li>Create an npm account and log in:<pre><code class="language-bash">npm login
+</code></pre>
+</li>
+<li>Add <code>NPM_TOKEN</code> to GitHub Secrets for automated publishing:<ul>
+<li>Go to <code>Settings &gt; Secrets and variables &gt; Actions &gt; New repository secret</code>.</li>
+<li>Add <code>NPM_TOKEN</code> with your npm token.</li>
+</ul>
+</li>
+<li>Run a publish command (e.g., <code>npm run publish</code>).</li>
+</ol>
+<h3>🔗 GitHub Packages Setup</h3>
+<ol>
+<li>Create a GitHub Classic Personal Access Token with <code>repo</code> and <code>write:packages</code> scopes.</li>
+<li>During <code>init</code>, provide the token or add it to <code>.npmrc</code>:<pre><code>//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+</code></pre>
+</li>
+<li>Add <code>GITHUB_TOKEN</code> to GitHub Secrets.</li>
+<li>Ensure the repository exists at <code>https://github.com/&lt;username&gt;/&lt;repo-name&gt;</code>.</li>
+</ol>
+<h3>🤖 GitHub Actions for Auto-Publishing</h3>
+<ol>
+<li>Add <code>NPM_TOKEN</code> and <code>GITHUB_TOKEN</code> to GitHub Secrets.</li>
+<li>The <code>.github/workflows/publish.yml</code> workflow runs on pushes to <code>main</code>, detecting version bump types (<code>major</code>, <code>minor</code>, <code>patch</code>) from commit messages.</li>
 </ol>
 <hr>
-<h2>📦 Setup npmjs.org</h2>
-<p>To publish to npm:</p>
-<ol>
-<li>Run<code>npm login</code></li>
-<li>Save your<code>NPM_TOKEN</code> in GitHub Secrets (for CI/CD)</li>
-<li>Run:</li>
-</ol>
-<pre><code>npm run publish
+<h2>📜 Scripts in package.json</h2>
+<p>The <code>package.json</code> includes a rich set of scripts for development and publishing:</p>
+<pre><code class="language-json">{
+  &quot;scripts&quot;: {
+    &quot;publish&quot;: &quot;node node_modules/build-a-npm/publish.js --patch --npmjs --github &amp;&amp; npm run git &amp;&amp; npm run console&quot;,
+    &quot;publish:patch&quot;: &quot;node node_modules/build-a-npm/publish.js --patch --npmjs --github &amp;&amp; npm run git &amp;&amp; npm run console&quot;,
+    &quot;publish:minor&quot;: &quot;node node_modules/build-a-npm/publish.js --minor --npmjs --github &amp;&amp; npm run git &amp;&amp; npm run console&quot;,
+    &quot;publish:major&quot;: &quot;node node_modules/build-a-npm/publish.js --major --npmjs --github &amp;&amp; npm run git &amp;&amp; npm run console&quot;,
+    &quot;pub&quot;: &quot;npm run publish:patch&quot;,
+    &quot;pub:pat&quot;: &quot;npm run publish:patch&quot;,
+    &quot;pub:min&quot;: &quot;npm run publish:minor&quot;,
+    &quot;pub:maj&quot;: &quot;npm run publish:major&quot;,
+    &quot;nogit:patch&quot;: &quot;node node_modules/build-a-npm/publish.js --patch --npmjs --github &amp;&amp; npm run console&quot;,
+    &quot;nogit:minor&quot;: &quot;node node_modules/build-a-npm/publish.js --minor --npmjs --github &amp;&amp; npm run console&quot;,
+    &quot;nogit:major&quot;: &quot;node node_modules/build-a-npm/publish.js --major --npmjs --github &amp;&amp; npm run console&quot;,
+    &quot;do&quot;: &quot;npm run git &amp;&amp; node publish.js --patch --github --npmjs &amp;&amp; npm run console&quot;,
+    &quot;git&quot;: &quot;npm run index &amp;&amp; git add . &amp;&amp; git commit -m \&quot;chore: updates\&quot; &amp;&amp; git branch -M main &amp;&amp; (git remote get-url origin || git remote add origin https://github.com/hsinghhira/build-a-npm.git) &amp;&amp; git push&quot;,
+    &quot;index&quot;: &quot;node generateIndex.js&quot;,
+    &quot;console&quot;: &quot;node node_modules/build-a-npm/lib/publishConsole.js&quot;,
+    &quot;format&quot;: &quot;prettier --write .&quot;,
+    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;
+  }
+}
 </code></pre>
 <hr>
 <h2>🔧 Example Workflow</h2>
-<pre><code># 1. Create a new package
-npx build-a-npm init
-
-# 2. Add your code in index.js
-
-# 3. Install any needed dependencies
-npm install
-
-# 4. Publish your first version
-npm run publish
-
-# 5. Next time, bump version like this:
-npm run publish:minor
+<ol>
+<li><p><strong>Initialize a Package</strong>:</p>
+<pre><code class="language-bash">npx build-a-npm init
 </code></pre>
+<p>Answer prompts to configure your package.</p>
+</li>
+<li><p><strong>Install Dependencies</strong>:</p>
+<pre><code class="language-bash">npm install
+</code></pre>
+</li>
+<li><p><strong>Develop Your Package</strong>:<br>Edit <code>index.js</code> to add your functionality.</p>
+</li>
+<li><p><strong>Format Code</strong>:</p>
+<pre><code class="language-bash">npm run format
+</code></pre>
+</li>
+<li><p><strong>Publish the Package</strong>:</p>
+<pre><code class="language-bash">npm run publish
+</code></pre>
+</li>
+<li><p><strong>Update and Republish</strong>:</p>
+<pre><code class="language-bash">npm run publish:minor
+</code></pre>
+</li>
+<li><p><strong>Publish Documentation</strong> (if enabled):</p>
+<pre><code class="language-bash">npm run index
+</code></pre>
+</li>
+</ol>
 <hr>
 <h2>🛠️ Troubleshooting</h2>
 <table>
@@ -842,47 +976,61 @@ npm run publish:minor
 </tr>
 </thead>
 <tbody><tr>
-<td>Permission Error</td>
-<td>Run terminal as Admin or use sudo</td>
+<td><strong>Permission Error</strong></td>
+<td>Run as Administrator (Windows) or use <code>sudo</code> (macOS/Linux).</td>
 </tr>
 <tr>
-<td>GitHub Token Issue</td>
-<td>Check token scope and<code>.npmrc</code></td>
+<td><strong>GitHub Token Issue</strong></td>
+<td>Ensure tokens have <code>repo</code>, <code>write:packages</code>, or <code>pages:write</code> scopes.</td>
 </tr>
 <tr>
-<td>Publish Fails</td>
-<td>Check internet and auth settings</td>
+<td><strong>Publish Failure</strong></td>
+<td>Verify network, <code>NPM_TOKEN</code>, and <code>GITHUB_TOKEN</code> in <code>.npmrc</code> or Secrets.</td>
+</tr>
+<tr>
+<td><strong>Package Name Conflict</strong></td>
+<td>Check npm registry for existing names; use a unique or scoped name.</td>
+</tr>
+<tr>
+<td><strong>Git Issues</strong></td>
+<td>Use <code>--no-git</code> or resolve git conflicts manually.</td>
 </tr>
 </tbody></table>
 <hr>
 <h2>🤝 Contributing</h2>
-<p>Feel free to open issues or submit PRs:</p>
-<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
+<p>We welcome contributions! To get involved:</p>
+<ol>
+<li>Visit the <a href="https://github.com/hsinghhira/build-a-npm">GitHub Repository</a>.</li>
+<li>Open an issue for bugs or feature requests.</li>
+<li>Submit a pull request with your changes, following the repository’s guidelines.</li>
+</ol>
+<hr>
+<h2>📩 Contact me</h2>
+<p>Feel free to contact me related to anything:</p>
+<h2>👉 <a href="https://me.hsinghhira.me/contact/">Contact me</a></h2>
 <hr>
 <h2>📄 License</h2>
-<p>This project is licensed under the <a href="">MIT License</a></p>
-
-
+<p>MIT License</p>
+<p>Copyright (c) 2025 Harman Singh Hira</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy<br>of this software and associated documentation files (the &quot;Software&quot;), to deal<br>in the Software without restriction, including without limitation the rights<br>to use, copy, modify, merge, publish, distribute, sublicense, and/or sell<br>copies of the Software, and to permit persons to whom the Software is<br>furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all<br>copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR<br>IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,<br>FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE<br>AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER<br>LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,<br>OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE<br>SOFTWARE.</p>
 
       <footer>
-        <p>&copy; 2025 — build-a-npm</p>
-        <p>Documentation automatically generated from README.md</p>
+        <p>&copy; 2025 — build-a-npm Documentation - MIT License - Build with ❤️ by Harman Singh Hira</p>
+        <p></p>
       </footer>
     </main>
   </div>
-
-   <script>
+  <script>
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute("data-theme");
       const next = current === "dark" ? "light" : "dark";
       html.setAttribute("data-theme", next);
       localStorage.setItem("theme", next);
-
-      // Update theme button text and icon
       const themeIcon = document.getElementById("themeIcon");
       const themeText = document.getElementById("themeText");
-
       if (next === "dark") {
         themeIcon.textContent = "🌙";
         themeText.textContent = "Dark Mode";
@@ -890,8 +1038,6 @@ npm run publish:minor
         themeIcon.textContent = "☀️";
         themeText.textContent = "Light Mode";
       }
-
-      // Add smooth transition effect
       document.body.style.transition = 'all 0.3s ease';
       setTimeout(() => {
         document.body.style.transition = '';
@@ -903,13 +1049,10 @@ npm run publish:minor
       const overlay = document.getElementById("overlay");
       const menuToggle = document.getElementById("menuToggle");
       const closeBtn = document.querySelector(".nav-close");
-
       nav.classList.toggle("show");
       overlay.classList.toggle("show");
       menuToggle.classList.toggle("active");
       closeBtn.classList.toggle("show");
-
-      // Close nav when clicking overlay
       if (nav.classList.contains("show")) {
         overlay.addEventListener('click', closeNav);
       } else {
@@ -922,18 +1065,15 @@ npm run publish:minor
       const overlay = document.getElementById("overlay");
       const menuToggle = document.getElementById("menuToggle");
       const closeBtn = document.querySelector(".nav-close");
-
       nav.classList.remove("show");
       overlay.classList.remove("show");
       menuToggle.classList.remove("active");
       closeBtn.classList.remove("show");
-
       overlay.removeEventListener('click', closeNav);
     }
 
-    // Generate table of contents from headers
     function generateTOC() {
-      const headers = document.querySelectorAll('main h2');
+      const headers = document.querySelectorAll('main h1');
       const tocList = document.getElementById('tocList');
       
       headers.forEach((header, index) => {
@@ -960,7 +1100,6 @@ npm run publish:minor
       });
     }
 
-    // Smooth scrolling for navigation links
     function setupSmoothScrolling() {
       document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -971,8 +1110,6 @@ npm run publish:minor
               behavior: 'smooth',
               block: 'start'
             });
-
-            // Close mobile nav after clicking
             if (window.innerWidth <= 768) {
               closeNav();
             }
@@ -981,15 +1118,11 @@ npm run publish:minor
       });
     }
 
-    // Initialize theme from localStorage
     function initializeTheme() {
       const saved = localStorage.getItem("theme") || "dark";
       document.documentElement.setAttribute("data-theme", saved);
-
-      // Update theme button text and icon
       const themeIcon = document.getElementById("themeIcon");
       const themeText = document.getElementById("themeText");
-
       if (saved === "dark") {
         themeIcon.textContent = "🌙";
         themeText.textContent = "Dark Mode";
@@ -999,13 +1132,10 @@ npm run publish:minor
       }
     }
 
-    // Initialize everything when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
       generateTOC();
       setupSmoothScrolling();
       initializeTheme();
-
-      // Wrap tables in containers for better responsive handling
       document.querySelectorAll('table').forEach(table => {
         if (!table.parentElement.classList.contains('table-container')) {
           const wrapper = document.createElement('div');
@@ -1016,11 +1146,9 @@ npm run publish:minor
       });
     });
 
-    // Add loading animation
     window.addEventListener('load', function() {
       document.body.style.opacity = '0';
       document.body.style.transform = 'translateY(20px)';
-
       setTimeout(() => {
         document.body.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         document.body.style.opacity = '1';
@@ -1028,7 +1156,6 @@ npm run publish:minor
       }, 100);
     });
 
-    // Close nav on escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeNav();
@@ -1036,5 +1163,4 @@ npm run publish:minor
     });
   </script>
 </body>
-
 </html>
