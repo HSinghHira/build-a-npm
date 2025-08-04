@@ -62,7 +62,6 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Header Styles */
     .header {
       background: var(--header-bg);
       color: white;
@@ -223,14 +222,14 @@
     .nav-close {
       display: none;
       position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
+      top: 2rem;
+      right: 2rem;
       background: rgba(102, 126, 234, 0.95);
       backdrop-filter: blur(10px);
       border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
       cursor: pointer;
       align-items: center;
       justify-content: center;
@@ -273,6 +272,10 @@
 
     .nav-close .close-icon span:nth-child(2) {
       transform: translateY(-50%) rotate(-45deg);
+    }
+
+    .nav-close.show {
+      display: flex;
     }
 
     .theme-toggle {
@@ -321,7 +324,7 @@
     nav a {
       color: var(--text);
       text-decoration: none;
-      padding: 1rem 1.25rem;
+      padding: 0.5rem 1.25rem;
       display: block;
       border-radius: 12px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -487,11 +490,12 @@
 
     a:hover {
       color: var(--accent-hover);
-      text-decoration: underline;
+      text-decoration: none;
     }
 
     /* Lists */
-    ul, ol {
+    ul,
+    ol {
       padding-left: 1.5rem;
     }
 
@@ -544,6 +548,9 @@
         transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border-right: 1px solid var(--border-color);
         box-shadow: 4px 0 25px rgba(0, 0, 0, 0.25);
+        height: 100%;
+        overflow-y: auto;
+
       }
 
       nav.show {
@@ -551,7 +558,7 @@
       }
 
       .nav-close {
-        display: flex !important;
+        display: none;
       }
 
       .menu-toggle.active {
@@ -635,7 +642,7 @@
 
   <div class="header">
     <div class="header-content">
-      <h1>📦 Documentation</h1>
+      <h1>📦 build-a-npm Documentation</h1>
       <p>Generated from README.md</p>
     </div>
   </div>
@@ -643,13 +650,8 @@
   <div class="container">
     <nav id="toc">
       <div class="nav-header">
-        <h3>Navigation</h3>
-        <button class="nav-close" onclick="closeNav()">
-          <div class="close-icon">
-            <span></span>
-            <span></span>
-          </div>
-        </button>
+
+
         <button class="theme-toggle" onclick="toggleTheme()">
           <span id="themeIcon">🌙</span>
           <span id="themeText">Dark Mode</span>
@@ -661,7 +663,12 @@
         </ul>
       </div>
     </nav>
-
+    <button class="nav-close" onclick="closeNav()">
+      <div class="close-icon">
+        <span></span>
+        <span></span>
+      </div>
+    </button>
     <main>
       <h1>🎉 Welcome</h1>
 <p>Welcome to the comprehensive documentation for <strong>build-a-npm</strong> - a powerful tool for creating and managing npm packages with ease.</p>
@@ -783,15 +790,16 @@ watcher.on(&#39;change&#39;, () =&gt; {
 <p><strong>Need Help?</strong> Check out our <a href="https://github.com/hsinghhira/build-a-npm">GitHub Repository</a> for examples, issues, and community support.</p>
 </blockquote>
 
-      
+
+
       <footer>
-        <p>&copy; 2025 — Generated with build-a-npm</p>
+        <p>&copy; 2025 — build-a-npm</p>
         <p>Documentation automatically generated from README.md</p>
       </footer>
     </main>
   </div>
 
-  <script>
+   <script>
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute("data-theme");
@@ -822,10 +830,12 @@ watcher.on(&#39;change&#39;, () =&gt; {
       const nav = document.getElementById("toc");
       const overlay = document.getElementById("overlay");
       const menuToggle = document.getElementById("menuToggle");
+      const closeBtn = document.querySelector(".nav-close");
 
       nav.classList.toggle("show");
       overlay.classList.toggle("show");
       menuToggle.classList.toggle("active");
+      closeBtn.classList.toggle("show");
 
       // Close nav when clicking overlay
       if (nav.classList.contains("show")) {
@@ -839,10 +849,13 @@ watcher.on(&#39;change&#39;, () =&gt; {
       const nav = document.getElementById("toc");
       const overlay = document.getElementById("overlay");
       const menuToggle = document.getElementById("menuToggle");
+      const closeBtn = document.querySelector(".nav-close");
 
       nav.classList.remove("show");
       overlay.classList.remove("show");
       menuToggle.classList.remove("active");
+      closeBtn.classList.remove("show");
+
       overlay.removeEventListener('click', closeNav);
     }
 
@@ -919,7 +932,7 @@ watcher.on(&#39;change&#39;, () =&gt; {
       generateTOC();
       setupSmoothScrolling();
       initializeTheme();
-      
+
       // Wrap tables in containers for better responsive handling
       document.querySelectorAll('table').forEach(table => {
         if (!table.parentElement.classList.contains('table-container')) {

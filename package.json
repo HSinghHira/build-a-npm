@@ -1,6 +1,6 @@
 {
   "name": "build-a-npm",
-  "version": "0.4.23",
+  "version": "0.4.24",
   "author": {
     "name": "Harman Singh Hira",
     "url": "https://me.hsinghhira.me"
@@ -43,7 +43,6 @@
     "simple-git": "*"
   },
   "devDependencies": {
-    "build-a-npm": "*",
     "marked": "latest",
     "prettier": "*"
   },
