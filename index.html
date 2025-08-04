@@ -670,125 +670,198 @@
       </div>
     </button>
     <main>
-      <h1>🎉 Welcome</h1>
-<p>Welcome to the comprehensive documentation for <strong>build-a-npm</strong> - a powerful tool for creating and managing npm packages with ease.</p>
-<p>This documentation is automatically generated from <code>WEBPAGE.md</code>. To update this page, simply edit that file and run <code>npm run index</code>.</p>
-<h1>🚀 Getting Started</h1>
-<p>Get up and running with build-a-npm in just a few simple steps:</p>
-<h2>Installation</h2>
-<pre><code class="language-bash">npm install build-a-npm --save-dev
-</code></pre>
-<h2>Quick Setup</h2>
+      <h1>🛠️ Build a Node.js Package</h1>
+<p><strong>A simple CLI tool to create and publish Node.js packages easily.</strong></p>
+<hr>
+<h2>📦 What is this?</h2>
+<p><code>build-a-npm</code> helps you create a new NPM package with all important files in seconds.</p>
+<p>It also lets you <strong>publish your package</strong> to:</p>
 <ul>
-<li>Initialize your project with <code>npm init</code></li>
-<li>Install build-a-npm as a development dependency</li>
-<li>Configure your build scripts in <code>package.json</code></li>
-<li>Start building amazing npm packages! 🎨</li>
+<li><a href="https://npmjs.com">npmjs.com</a></li>
+<li>GitHub Packages</li>
 </ul>
-<blockquote>
-<p><strong>Pro Tip:</strong> After editing <code>WEBPAGE.md</code>, run <code>npm run index</code> to regenerate this beautiful documentation page automatically.</p>
-</blockquote>
-<h1>✨ Features</h1>
-<p>build-a-npm comes packed with powerful features to streamline your development workflow:</p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Description</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Auto Documentation</strong></td>
-<td>Automatically generate beautiful documentation from Markdown</td>
-<td>✅ Active</td>
-</tr>
-<tr>
-<td><strong>Theme Support</strong></td>
-<td>Built-in dark/light theme switching with localStorage persistence</td>
-<td>✅ Active</td>
-</tr>
-<tr>
-<td><strong>Responsive Design</strong></td>
-<td>Mobile-first responsive design that works on all devices</td>
-<td>✅ Active</td>
-</tr>
-<tr>
-<td><strong>GitHub Pages Ready</strong></td>
-<td>Optimized for seamless GitHub Pages deployment</td>
-<td>✅ Active</td>
-</tr>
-<tr>
-<td><strong>TypeScript Support</strong></td>
-<td>Full TypeScript support with type definitions</td>
-<td>🚧 Coming Soon</td>
-</tr>
-</tbody></table>
-<h1>📚 API Reference</h1>
-<p>Comprehensive API documentation for build-a-npm:</p>
-<h2>Core Methods</h2>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Parameters</th>
-<th>Returns</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>build()</code></td>
-<td>options: BuildOptions</td>
-<td>Promise<void></td>
-<td>Builds your npm package with specified configuration</td>
-</tr>
-<tr>
-<td><code>watch()</code></td>
-<td>pattern: string</td>
-<td>Watcher</td>
-<td>Watches files for changes and rebuilds automatically</td>
-</tr>
-<tr>
-<td><code>clean()</code></td>
-<td>-</td>
-<td>Promise<void></td>
-<td>Cleans build artifacts and temporary files</td>
-</tr>
-<tr>
-<td><code>test()</code></td>
-<td>suite: string</td>
-<td>TestResults</td>
-<td>Runs test suite with coverage reporting</td>
-</tr>
-</tbody></table>
-<h2>Example Usage</h2>
-<pre><code class="language-javascript">import { build, watch } from &#39;build-a-npm&#39;;
-
-// Build your package
-await build({
-  entry: &#39;src/index.ts&#39;,
-  output: &#39;dist/&#39;,
-  format: [&#39;cjs&#39;, &#39;esm&#39;],
-  minify: true,
-});
-
-// Watch for changes
-const watcher = watch(&#39;src/**/*.ts&#39;);
-watcher.on(&#39;change&#39;, () =&gt; {
-  console.log(&#39;Rebuilding...&#39;);
-});
+<p>With <strong>automatic version bumping</strong> (patch, minor, or major)!</p>
+<hr>
+<h2>✨ Features</h2>
+<ul>
+<li>📦 Easy and guided package setup</li>
+<li>🛠️ Auto-create files:<code>index.js</code>,<code>.gitignore</code>,<code>README.md</code>, etc.</li>
+<li>🔄 Auto bump version (patch, minor, major)</li>
+<li>🚀 Publish to npm or GitHub with one command</li>
+<li>🤖 GitHub Actions &amp; GitLab CI support</li>
+<li>♻️ Update existing packages with<code>upgrade</code> command</li>
+<li>🌐 Works on Windows, macOS, and Linux</li>
+</ul>
+<hr>
+<h2>📥 Installation</h2>
+<h3>Option 1: Install globally</h3>
+<pre><code class="language-bash">npm install -g build-a-npm
 </code></pre>
-<h1>🔧 Next Steps</h1>
-<p>Ready to take your npm package to the next level? Here&#39;s what you can do:</p>
+<h3>Option 2: Use with npx (no install needed)</h3>
+<pre><code>npx build-a-npm init
+</code></pre>
+<hr>
+<h2>🚀 Usage</h2>
+<h3>🧱 Create a New Package</h3>
+<pre><code>npx build-a-npm init
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Ask for package details</li>
+<li>Create important files</li>
+<li>Set up GitHub workflows (optional)</li>
+<li>Init a Git repo (optional)</li>
+</ul>
+<h4>Optional flags:</h4>
+<ul>
+<li><code>--no-git</code>: skip Git initialization</li>
+<li><code>--sample</code>: use default answers</li>
+<li><code>--verbose</code>: show full logs</li>
+</ul>
+<p>Example:</p>
+<pre><code>npx build-a-npm init --sample --no-git
+</code></pre>
+<h3>🔁 Upgrade an Existing Package</h3>
+<pre><code>npx build-a-npm upgrade
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Update old setup</li>
+<li>Add missing config files</li>
+<li>Keep your custom code safe</li>
+</ul>
+<hr>
+<h2>⚙️ Scripts in package.json</h2>
+<p>These scripts help with publishing:</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npm run publish</code></td>
+<td>Bumps patch version and publishes</td>
+</tr>
+<tr>
+<td><code>npm run publish:patch</code></td>
+<td>Patch bump (x.y.z → x.y.z+1)</td>
+</tr>
+<tr>
+<td><code>npm run publish:minor</code></td>
+<td>Minor bump (x.y.z → x.y+1.0)</td>
+</tr>
+<tr>
+<td><code>npm run publish:major</code></td>
+<td>Major bump (x.y.z → x+1.0.0)</td>
+</tr>
+<tr>
+<td><code>npm run github</code></td>
+<td>Git commit &amp; push to GitHub</td>
+</tr>
+</tbody></table>
+<p>Example:</p>
+<pre><code>npm run publish:minor
+</code></pre>
+<hr>
+<h2>🧾 Files It Generates</h2>
+<ul>
+<li><code>package.json</code> – With scripts and meta infomation</li>
+<li><code>index.js</code> – Main code entry</li>
+<li><code>README.md</code> – Starter guide</li>
+<li><code>LICENSE</code> – MIT, ISC, GPL, etc.</li>
+<li><code>.gitignore</code> – For node projects</li>
+<li><code>.npmrc</code> – To publish to GitHub Packages <em>(only if GitHub publish is enabled)</em></li>
+<li><code>.github/workflows/publish.yml</code> – GitHub Actions CI/CD <em>(if enabled)</em></li>
+<li><code>.prettierrc</code>,<code>.eslintrc.json</code> – Config files <em>(if enabled)</em></li>
+<li><code>test.js</code>,<code>tsconfig.json</code> – Optional extras <em>(if enabled)</em></li>
+</ul>
+<hr>
+<h2>🤝 Contributing</h2>
+<p>Feel free to open issues or submit PRs:</p>
+<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
+<hr>
+<h2>📄 License</h2>
+<p>This project is licensed under the <a href="">MIT License</a></p>
+<hr>
+<h2>📤 Publishing</h2>
+<p>The script <code>publish.js</code> handles:</p>
 <ol>
-<li><strong>Customize</strong> - Update this documentation with your project-specific details</li>
-<li><strong>Build</strong> - Run <code>npm run index</code> to regenerate the beautiful index.html</li>
-<li><strong>Deploy</strong> - Commit your changes to update your GitHub Pages site automatically</li>
-<li><strong>Share</strong> - Share your amazing documentation with the world! 🌍</li>
+<li>Reading<code>package.json</code></li>
+<li>Bumping version</li>
+<li>Publishing to registries</li>
+<li>Restoring original file</li>
+<li>Committing and pushing to Git (if GitHub enabled)</li>
 </ol>
-<blockquote>
-<p><strong>Need Help?</strong> Check out our <a href="https://github.com/hsinghhira/build-a-npm">GitHub Repository</a> for examples, issues, and community support.</p>
-</blockquote>
+<p>If using GitHub Actions, your workflow (<code>publish.yml</code>) will auto-run when changes are pushed.</p>
+<hr>
+<h2>🔐 Setup GitHub Packages (optional)</h2>
+<p>To publish to GitHub:</p>
+<ol>
+<li>Use a GitHub token (with<code>write:packages</code> scope)</li>
+<li>Save it in<code>.npmrc</code> or GitHub Secrets:<ul>
+<li><code>NPM_TOKEN</code></li>
+<li><code>GITHUB_TOKEN</code></li>
+</ul>
+</li>
+<li>Make sure your GitHub repo exists and is linked</li>
+</ol>
+<hr>
+<h2>📦 Setup npmjs.org</h2>
+<p>To publish to npm:</p>
+<ol>
+<li>Run<code>npm login</code></li>
+<li>Save your<code>NPM_TOKEN</code> in GitHub Secrets (for CI/CD)</li>
+<li>Run:</li>
+</ol>
+<pre><code>npm run publish
+</code></pre>
+<hr>
+<h2>🔧 Example Workflow</h2>
+<pre><code># 1. Create a new package
+npx build-a-npm init
+
+# 2. Add your code in index.js
+
+# 3. Install any needed dependencies
+npm install
+
+# 4. Publish your first version
+npm run publish
+
+# 5. Next time, bump version like this:
+npm run publish:minor
+</code></pre>
+<hr>
+<h2>🛠️ Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Permission Error</td>
+<td>Run terminal as Admin or use sudo</td>
+</tr>
+<tr>
+<td>GitHub Token Issue</td>
+<td>Check token scope and<code>.npmrc</code></td>
+</tr>
+<tr>
+<td>Publish Fails</td>
+<td>Check internet and auth settings</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>🤝 Contributing</h2>
+<p>Feel free to open issues or submit PRs:</p>
+<p>👉 <a href="https://github.com/HSinghHira/build-a-npm">GitHub Repository</a></p>
+<hr>
+<h2>📄 License</h2>
+<p>This project is licensed under the <a href="">MIT License</a></p>
 
 
 
