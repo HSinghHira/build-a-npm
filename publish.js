@@ -15,6 +15,12 @@ if (!bumpType) {
 
 const publishToNpmjs = args.includes('--npmjs');
 const publishToGithub = args.includes('--github');
+const publishToArtifactory = args.includes('--artifactory');
+const publishToNexus = args.includes('--nexus');
+const publishToVerdaccio = args.includes('--verdaccio');
+const customRegistryUrl = args
+  .find(arg => arg.startsWith('--custom='))
+  ?.split('=')[1];
 
 // Step 1: Load original package.json
 const originalJson = fs.readFileSync('package.json', 'utf8');
@@ -76,14 +82,46 @@ function publishVariant(name, registry) {
 }
 
 // Step 4: Perform Publishing
-if (publishToNpmjs) {
-  publishVariant(backupPkg.name, 'https://registry.npmjs.org/');
-}
+const registries = [
+  {
+    flag: publishToNpmjs,
+    name: backupPkg.name,
+    url: 'https://registry.npmjs.org/',
+  },
+  {
+    flag: publishToGithub,
+    name: githubUsername
+      ? `@${githubUsername}/${backupPkg.name}`
+      : backupPkg.name,
+    url: 'https://npm.pkg.github.com/',
+  },
+  {
+    flag: publishToArtifactory,
+    name: backupPkg.name,
+    url:
+      process.env.ARTIFACTORY_REGISTRY ||
+      'https://<your-artifactory-domain>/artifactory/api/npm/npm-repo/',
+  },
+  {
+    flag: publishToNexus,
+    name: backupPkg.name,
+    url:
+      process.env.NEXUS_REGISTRY ||
+      'https://<your-nexus-domain>/repository/npm-public/',
+  },
+  {
+    flag: publishToVerdaccio,
+    name: backupPkg.name,
+    url: process.env.VERDACIO_REGISTRY || 'http://<your-verdaccio-host>:4873/',
+  },
+  { flag: !!customRegistryUrl, name: backupPkg.name, url: customRegistryUrl },
+];
 
-if (publishToGithub) {
-  const scopedName = `@${githubUsername}/${backupPkg.name}`;
-  publishVariant(scopedName, 'https://npm.pkg.github.com/');
-}
+registries.forEach(({ flag, name, url }) => {
+  if (flag && url) {
+    publishVariant(name, url);
+  }
+});
 
 // Step 5: Restore original package.json with bumped version
 const restoredPkg = {
