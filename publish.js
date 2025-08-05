@@ -20,6 +20,22 @@ const publishToGithub = args.includes('--github');
 const originalJson = fs.readFileSync('package.json', 'utf8');
 const originalPkg = JSON.parse(originalJson);
 
+// Clone a deep copy to restore later
+const cloneDeep = obj => JSON.parse(JSON.stringify(obj));
+const backupPkg = cloneDeep(originalPkg);
+
+// Get GitHub username from repository field
+const repoUrl = originalPkg.repository?.url || '';
+const githubMatch = repoUrl.match(/github\.com[/:](.+?)\//);
+const githubUsername = githubMatch ? githubMatch[1] : null;
+
+if (publishToGithub && !githubUsername) {
+  console.error(
+    '❌ Could not determine GitHub username from package.json "repository.url"'
+  );
+  process.exit(1);
+}
+
 // Step 2: Bump version
 function bumpVersion(version, type) {
   const [major, minor, patch] = version.split('.').map(Number);
@@ -31,7 +47,7 @@ function bumpVersion(version, type) {
 const bumpedVersion = bumpVersion(originalPkg.version, bumpType);
 console.log(`🔧 Bumping version: ${originalPkg.version} → ${bumpedVersion}`);
 
-// Save bumped version to package.json
+// Save bumped version to package.json (temp)
 originalPkg.version = bumpedVersion;
 fs.writeFileSync('package.json', JSON.stringify(originalPkg, null, 2));
 
@@ -45,8 +61,7 @@ function publishVariant(name, registry) {
       registry,
       access: 'public',
     },
-    // Remove scripts to prevent infinite loops
-    scripts: {},
+    scripts: {}, // prevent infinite loops
   };
 
   fs.writeFileSync('package.json', JSON.stringify(modifiedPkg, null, 2));
@@ -62,17 +77,18 @@ function publishVariant(name, registry) {
 
 // Step 4: Perform Publishing
 if (publishToNpmjs) {
-  publishVariant('build-a-npm', 'https://registry.npmjs.org/');
+  publishVariant(backupPkg.name, 'https://registry.npmjs.org/');
 }
 
 if (publishToGithub) {
-  publishVariant('@hsinghhira/build-a-npm', 'https://npm.pkg.github.com/');
+  const scopedName = `@${githubUsername}/${backupPkg.name}`;
+  publishVariant(scopedName, 'https://npm.pkg.github.com/');
 }
 
-// Step 5: Restore original package.json but keep the bumped version
+// Step 5: Restore original package.json with bumped version
 const restoredPkg = {
-  ...originalPkg,
-  version: bumpedVersion, // Keep the new version
+  ...backupPkg,
+  version: bumpedVersion,
 };
 fs.writeFileSync('package.json', JSON.stringify(restoredPkg, null, 2));
 console.log(
