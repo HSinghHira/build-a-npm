@@ -71,7 +71,7 @@ function publishVariant(name, registry) {
   }
 }
 
-// Step 4: Publish to npmjs and GitHub
+// Step 4: Publish to registries
 let success = true;
 
 if (publishToNpmjs) {
@@ -85,7 +85,7 @@ if (publishToGithub) {
     publishVariant(scopedName, "https://npm.pkg.github.com/") && success;
 }
 
-// Step 5: Final handling
+// Step 5: Finalize
 if (!success) {
   console.warn(
     "⚠️ One or more publishes failed. Reverting to original version..."
@@ -102,5 +102,18 @@ if (!success) {
   console.log(
     `\n🔄 package.json restored to original name with bumped version ${bumpedVersion}.`
   );
+
+  // ✅ Step 6: Git commit
+  try {
+    execSync(`git add .`, { stdio: "inherit" });
+    execSync(`git commit -m "Update to v${bumpedVersion}"`, {
+      stdio: "inherit",
+    });
+    execSync(`git push`, { stdio: "inherit" });
+    console.log("✅ Git commit and push completed.");
+  } catch (err) {
+    console.warn("⚠️ Git commit or push failed:", err.message);
+  }
+
   console.log("✅ Publishing process completed successfully.");
 }
